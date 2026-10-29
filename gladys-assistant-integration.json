@@ -1,177 +1,589 @@
 {
   "manifest_version": 1,
   "type": "device",
-  "name": "Demo Devices Template",
+  "name": "DriveBC",
   "description": {
-    "en": "Starter template showing sensors, a switch, a dimmable light and a smart plug.",
-    "fr": "Template de démarrage : capteurs, interrupteur, lampe variable et prise connectée."
+    "en": "Unofficial. Road events in British Columbia from DriveBC open data.",
+    "fr": "Non officiel. Événements routiers en Colombie-Britannique (données ouvertes DriveBC)."
   },
-  "version": "1.0.0",
-  "docker_image": "ghcr.io/gladysassistant/integration-template-js:1.0.0",
+  "version": "0.1.0",
+  "docker_image": "ghcr.io/lm1lc3n7/gladys-drivebc:0.1.0",
   "gladys_version": ">=5.1.0",
-  "cover_image": "https://raw.githubusercontent.com/GladysAssistant/integration-template-js/master/cover.png",
-  "categories": ["lighting", "security", "environment"],
-  "transports": ["local", "cloud"],
+  "cover_image": "https://raw.githubusercontent.com/LM1LC3N7/gladys-drivebc/main/cover.png",
+  "categories": ["transport"],
+  "transports": ["cloud"],
   "config_schema": [
     {
       "key": "intro",
       "type": "section",
-      "label": { "en": "Getting started", "fr": "Pour commencer" },
+      "label": {
+        "en": "DriveBC road events",
+        "fr": "Événements routiers DriveBC"
+      },
       "description": {
-        "en": "The demo weather station reads real data from the free Open-Meteo API: pick the coordinates to observe. No account, no API key.",
-        "fr": "La station météo de démonstration lit de vraies données via l'API gratuite Open-Meteo : choisissez les coordonnées à observer. Pas de compte, pas de clé d'API."
+        "en": "Closures, construction, incidents and road conditions published by DriveBC (Province of British Columbia), read from its public Open511 API: no account, no key. Up to three zones, each one a device. Data in English only, under the Open Government Licence – British Columbia. Check DriveBC before you drive: this integration is not an official source.",
+        "fr": "Fermetures, travaux, incidents et état des routes publiés par DriveBC (Province de la Colombie-Britannique), lus sur son API publique Open511 : sans compte ni clé. Jusqu'à trois zones, un appareil chacune. Données en anglais seulement, sous la Licence du gouvernement ouvert – Colombie-Britannique. Vérifiez DriveBC avant de prendre la route : cette intégration n'est pas une source officielle."
       },
       "links": [
         {
-          "url": "https://open-meteo.com/en/docs",
-          "label": { "en": "Open-Meteo documentation", "fr": "Documentation Open-Meteo" }
+          "url": "https://www.drivebc.ca/",
+          "label": {
+            "en": "DriveBC",
+            "fr": "DriveBC"
+          }
+        },
+        {
+          "url": "https://api.open511.gov.bc.ca/help",
+          "label": {
+            "en": "DriveBC Open511 API",
+            "fr": "API Open511 de DriveBC"
+          }
+        },
+        {
+          "url": "https://www2.gov.bc.ca/gov/content/data/policy-standards/open-data/open-government-licence-bc",
+          "label": {
+            "en": "Open Government Licence – BC",
+            "fr": "Licence du gouvernement ouvert – C.-B."
+          }
         }
       ]
     },
     {
-      "key": "latitude",
-      "type": "number",
-      "label": { "en": "Latitude", "fr": "Latitude" },
-      "description": {
-        "en": "Latitude used for the demo weather sensor.",
-        "fr": "Latitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 48.8566", "fr": "ex. 48.8566" },
-      "required": true,
-      "default": 48.8566,
-      "min": -90,
-      "max": 90
-    },
-    {
-      "key": "longitude",
-      "type": "number",
-      "label": { "en": "Longitude", "fr": "Longitude" },
-      "description": {
-        "en": "Longitude used for the demo weather sensor.",
-        "fr": "Longitude utilisée par le capteur météo de démonstration."
-      },
-      "placeholder": { "en": "e.g. 2.3522", "fr": "ex. 2.3522" },
-      "required": true,
-      "default": 2.3522,
-      "min": -180,
-      "max": 180
-    },
-    {
-      "key": "unit",
+      "key": "language",
       "type": "select",
-      "label": { "en": "Temperature unit", "fr": "Unité de température" },
+      "label": {
+        "en": "Language of the summary",
+        "fr": "Langue du résumé"
+      },
+      "description": {
+        "en": "Language of the device names and of the summary text (DriveBC road names stay in English).",
+        "fr": "Langue des noms d'appareils et du texte de résumé (les noms de routes DriveBC restent en anglais)."
+      },
       "required": false,
-      "default": "celsius",
+      "default": "en",
       "options": [
-        { "value": "celsius", "label": { "en": "Celsius", "fr": "Celsius" } },
-        { "value": "fahrenheit", "label": { "en": "Fahrenheit", "fr": "Fahrenheit" } }
+        {
+          "value": "en",
+          "label": {
+            "en": "English",
+            "fr": "Anglais"
+          }
+        },
+        {
+          "value": "fr",
+          "label": {
+            "en": "French",
+            "fr": "Français"
+          }
+        }
       ]
     },
     {
-      "key": "poll_frequency",
+      "key": "refresh_minutes",
       "type": "number",
-      "label": { "en": "Refresh interval (s)", "fr": "Intervalle de rafraîchissement (s)" },
+      "label": {
+        "en": "Read interval (minutes)",
+        "fr": "Intervalle de lecture (minutes)"
+      },
       "description": {
-        "en": "How often sensors are polled, in seconds (one minute minimum).",
-        "fr": "Fréquence d'interrogation des capteurs, en secondes (une minute minimum)."
+        "en": "From 3 to 60 minutes. DriveBC asks for at least 10 s between two requests: the zones are read one after the other, 12 s apart.",
+        "fr": "De 3 à 60 minutes. DriveBC demande au moins 10 s entre deux requêtes : les zones sont lues l'une après l'autre, à 12 s d'écart."
       },
       "required": false,
-      "default": 300,
-      "min": 60,
-      "max": 3600
+      "default": 5,
+      "min": 3,
+      "max": 60
+    },
+    {
+      "key": "zone1",
+      "type": "section",
+      "label": {
+        "en": "Zone 1",
+        "fr": "Zone 1"
+      },
+      "description": {
+        "en": "A circle around a point: the events in effect inside it are counted. Required.",
+        "fr": "Un cercle autour d'un point : les événements en cours à l'intérieur sont comptés. Obligatoire."
+      }
+    },
+    {
+      "key": "zone1_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom"
+      },
+      "description": {
+        "en": "Name of the device in Gladys (60 characters at most).",
+        "fr": "Nom de l'appareil dans Gladys (60 caractères au plus)."
+      },
+      "placeholder": {
+        "en": "e.g. Home",
+        "fr": "ex. Maison"
+      },
+      "required": false
+    },
+    {
+      "key": "zone1_latitude",
+      "type": "number",
+      "label": {
+        "en": "Latitude",
+        "fr": "Latitude"
+      },
+      "description": {
+        "en": "Center of the zone, in British Columbia (decimal degrees).",
+        "fr": "Centre de la zone, en Colombie-Britannique (degrés décimaux)."
+      },
+      "placeholder": {
+        "en": "e.g. 49.2827",
+        "fr": "ex. 49.2827"
+      },
+      "required": true,
+      "min": 48,
+      "max": 60.5
+    },
+    {
+      "key": "zone1_longitude",
+      "type": "number",
+      "label": {
+        "en": "Longitude",
+        "fr": "Longitude"
+      },
+      "description": {
+        "en": "Center of the zone (decimal degrees, negative: west).",
+        "fr": "Centre de la zone (degrés décimaux, négatif : ouest)."
+      },
+      "placeholder": {
+        "en": "e.g. -123.1207",
+        "fr": "ex. -123.1207"
+      },
+      "required": true,
+      "min": -139.5,
+      "max": -113.5
+    },
+    {
+      "key": "zone1_radius_km",
+      "type": "number",
+      "label": {
+        "en": "Radius (km)",
+        "fr": "Rayon (km)"
+      },
+      "description": {
+        "en": "From 1 to 300 km.",
+        "fr": "De 1 à 300 km."
+      },
+      "required": false,
+      "default": 25,
+      "min": 1,
+      "max": 300
+    },
+    {
+      "key": "zone1_roads",
+      "type": "string",
+      "label": {
+        "en": "Only these roads",
+        "fr": "Seulement ces routes"
+      },
+      "description": {
+        "en": "Optional: road names as DriveBC writes them, separated by commas (\"Highway 1, Highway 99\"; \"Hwy 99\" works too). Empty: every road of the zone.",
+        "fr": "Facultatif : noms de routes tels que DriveBC les écrit, séparés par des virgules (« Highway 1, Highway 99 » ; « Hwy 99 » marche aussi). Vide : toutes les routes de la zone."
+      },
+      "placeholder": {
+        "en": "e.g. Highway 1, Highway 99",
+        "fr": "ex. Highway 1, Highway 99"
+      },
+      "required": false
+    },
+    {
+      "key": "zone2",
+      "type": "section",
+      "label": {
+        "en": "Zone 2 (optional)",
+        "fr": "Zone 2 (facultative)"
+      },
+      "description": {
+        "en": "A circle around a point: the events in effect inside it are counted. Leave the latitude and longitude empty to turn it off.",
+        "fr": "Un cercle autour d'un point : les événements en cours à l'intérieur sont comptés. Laissez la latitude et la longitude vides pour la désactiver."
+      }
+    },
+    {
+      "key": "zone2_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom"
+      },
+      "description": {
+        "en": "Name of the device in Gladys (60 characters at most).",
+        "fr": "Nom de l'appareil dans Gladys (60 caractères au plus)."
+      },
+      "placeholder": {
+        "en": "e.g. Commute",
+        "fr": "ex. Trajet"
+      },
+      "required": false
+    },
+    {
+      "key": "zone2_latitude",
+      "type": "number",
+      "label": {
+        "en": "Latitude",
+        "fr": "Latitude"
+      },
+      "description": {
+        "en": "Center of the zone, in British Columbia (decimal degrees).",
+        "fr": "Centre de la zone, en Colombie-Britannique (degrés décimaux)."
+      },
+      "placeholder": {
+        "en": "e.g. 49.2827",
+        "fr": "ex. 49.2827"
+      },
+      "required": false,
+      "min": 48,
+      "max": 60.5
+    },
+    {
+      "key": "zone2_longitude",
+      "type": "number",
+      "label": {
+        "en": "Longitude",
+        "fr": "Longitude"
+      },
+      "description": {
+        "en": "Center of the zone (decimal degrees, negative: west).",
+        "fr": "Centre de la zone (degrés décimaux, négatif : ouest)."
+      },
+      "placeholder": {
+        "en": "e.g. -123.1207",
+        "fr": "ex. -123.1207"
+      },
+      "required": false,
+      "min": -139.5,
+      "max": -113.5
+    },
+    {
+      "key": "zone2_radius_km",
+      "type": "number",
+      "label": {
+        "en": "Radius (km)",
+        "fr": "Rayon (km)"
+      },
+      "description": {
+        "en": "From 1 to 300 km.",
+        "fr": "De 1 à 300 km."
+      },
+      "required": false,
+      "default": 25,
+      "min": 1,
+      "max": 300
+    },
+    {
+      "key": "zone2_roads",
+      "type": "string",
+      "label": {
+        "en": "Only these roads",
+        "fr": "Seulement ces routes"
+      },
+      "description": {
+        "en": "Optional: road names as DriveBC writes them, separated by commas (\"Highway 1, Highway 99\"; \"Hwy 99\" works too). Empty: every road of the zone.",
+        "fr": "Facultatif : noms de routes tels que DriveBC les écrit, séparés par des virgules (« Highway 1, Highway 99 » ; « Hwy 99 » marche aussi). Vide : toutes les routes de la zone."
+      },
+      "placeholder": {
+        "en": "e.g. Highway 1, Highway 99",
+        "fr": "ex. Highway 1, Highway 99"
+      },
+      "required": false
+    },
+    {
+      "key": "zone3",
+      "type": "section",
+      "label": {
+        "en": "Zone 3 (optional)",
+        "fr": "Zone 3 (facultative)"
+      },
+      "description": {
+        "en": "A circle around a point: the events in effect inside it are counted. Leave the latitude and longitude empty to turn it off.",
+        "fr": "Un cercle autour d'un point : les événements en cours à l'intérieur sont comptés. Laissez la latitude et la longitude vides pour la désactiver."
+      }
+    },
+    {
+      "key": "zone3_name",
+      "type": "string",
+      "label": {
+        "en": "Name",
+        "fr": "Nom"
+      },
+      "description": {
+        "en": "Name of the device in Gladys (60 characters at most).",
+        "fr": "Nom de l'appareil dans Gladys (60 caractères au plus)."
+      },
+      "placeholder": {
+        "en": "e.g. Cabin",
+        "fr": "ex. Chalet"
+      },
+      "required": false
+    },
+    {
+      "key": "zone3_latitude",
+      "type": "number",
+      "label": {
+        "en": "Latitude",
+        "fr": "Latitude"
+      },
+      "description": {
+        "en": "Center of the zone, in British Columbia (decimal degrees).",
+        "fr": "Centre de la zone, en Colombie-Britannique (degrés décimaux)."
+      },
+      "placeholder": {
+        "en": "e.g. 49.2827",
+        "fr": "ex. 49.2827"
+      },
+      "required": false,
+      "min": 48,
+      "max": 60.5
+    },
+    {
+      "key": "zone3_longitude",
+      "type": "number",
+      "label": {
+        "en": "Longitude",
+        "fr": "Longitude"
+      },
+      "description": {
+        "en": "Center of the zone (decimal degrees, negative: west).",
+        "fr": "Centre de la zone (degrés décimaux, négatif : ouest)."
+      },
+      "placeholder": {
+        "en": "e.g. -123.1207",
+        "fr": "ex. -123.1207"
+      },
+      "required": false,
+      "min": -139.5,
+      "max": -113.5
+    },
+    {
+      "key": "zone3_radius_km",
+      "type": "number",
+      "label": {
+        "en": "Radius (km)",
+        "fr": "Rayon (km)"
+      },
+      "description": {
+        "en": "From 1 to 300 km.",
+        "fr": "De 1 à 300 km."
+      },
+      "required": false,
+      "default": 25,
+      "min": 1,
+      "max": 300
+    },
+    {
+      "key": "zone3_roads",
+      "type": "string",
+      "label": {
+        "en": "Only these roads",
+        "fr": "Seulement ces routes"
+      },
+      "description": {
+        "en": "Optional: road names as DriveBC writes them, separated by commas (\"Highway 1, Highway 99\"; \"Hwy 99\" works too). Empty: every road of the zone.",
+        "fr": "Facultatif : noms de routes tels que DriveBC les écrit, séparés par des virgules (« Highway 1, Highway 99 » ; « Hwy 99 » marche aussi). Vide : toutes les routes de la zone."
+      },
+      "placeholder": {
+        "en": "e.g. Highway 1, Highway 99",
+        "fr": "ex. Highway 1, Highway 99"
+      },
+      "required": false
     }
   ],
   "actions": [
     {
-      "key": "test_weather",
-      "label": { "en": "Test the weather provider", "fr": "Tester le fournisseur météo" },
-      "timeout_seconds": 30
-    },
-    {
-      "key": "identify",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "fields": [
-        {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ]
+      "key": "test",
+      "label": {
+        "en": "Show the last read",
+        "fr": "Voir la dernière lecture"
+      },
+      "timeout_seconds": 10
     }
   ],
   "scene_triggers": [
     {
-      "key": "motion_detected",
-      "label": { "en": "Motion detected", "fr": "Mouvement détecté" },
+      "key": "new_event",
+      "label": {
+        "en": "New DriveBC event in a zone",
+        "fr": "Nouvel événement DriveBC dans une zone"
+      },
       "description": {
-        "en": "A demo motion sensor saw a person or an animal move.",
-        "fr": "Un détecteur de démonstration a vu bouger une personne ou un animal."
+        "en": "An event in effect appears in a zone for the first time (created, updated or started within the last 2 hours). Not fired by the first read of a zone.",
+        "fr": "Un événement en cours apparaît pour la première fois dans une zone (créé, mis à jour ou commencé dans les 2 dernières heures). Pas déclenché par la première lecture d'une zone."
       },
       "fields": [
         {
           "key": "device",
           "type": "select",
           "source": "devices",
-          "label": { "en": "Sensor", "fr": "Détecteur" }
+          "label": {
+            "en": "Zone",
+            "fr": "Zone"
+          }
         },
         {
-          "key": "target",
+          "key": "event_type",
           "type": "multi_select",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" },
+          "label": {
+            "en": "Event types",
+            "fr": "Types d'événement"
+          },
           "options": [
-            { "value": "person", "label": { "en": "Person", "fr": "Personne" } },
-            { "value": "animal", "label": { "en": "Animal", "fr": "Animal" } }
+            {
+              "value": "CONSTRUCTION",
+              "label": {
+                "en": "Construction",
+                "fr": "Travaux"
+              }
+            },
+            {
+              "value": "INCIDENT",
+              "label": {
+                "en": "Incident",
+                "fr": "Incident"
+              }
+            },
+            {
+              "value": "WEATHER_CONDITION",
+              "label": {
+                "en": "Weather",
+                "fr": "Météo"
+              }
+            },
+            {
+              "value": "ROAD_CONDITION",
+              "label": {
+                "en": "Road condition",
+                "fr": "État de la route"
+              }
+            },
+            {
+              "value": "SPECIAL_EVENT",
+              "label": {
+                "en": "Special event",
+                "fr": "Événement spécial"
+              }
+            }
+          ]
+        },
+        {
+          "key": "severity",
+          "type": "multi_select",
+          "label": {
+            "en": "Severity",
+            "fr": "Gravité"
+          },
+          "options": [
+            {
+              "value": "MAJOR",
+              "label": {
+                "en": "Major",
+                "fr": "Majeure"
+              }
+            },
+            {
+              "value": "MODERATE",
+              "label": {
+                "en": "Moderate",
+                "fr": "Modérée"
+              }
+            },
+            {
+              "value": "MINOR",
+              "label": {
+                "en": "Minor",
+                "fr": "Mineure"
+              }
+            },
+            {
+              "value": "UNKNOWN",
+              "label": {
+                "en": "Unknown",
+                "fr": "Inconnue"
+              }
+            }
           ]
         }
       ],
       "variables": [
         {
-          "key": "target",
+          "key": "road",
           "type": "string",
-          "label": { "en": "What moved", "fr": "Ce qui a bougé" }
-        }
-      ]
-    }
-  ],
-  "scene_actions": [
-    {
-      "key": "identify_device",
-      "label": { "en": "Identify a device", "fr": "Identifier un appareil" },
-      "description": {
-        "en": "Make a device signal itself (the demo light blinks).",
-        "fr": "Fait se signaler un appareil (la lampe de démonstration clignote)."
-      },
-      "timeout_seconds": 15,
-      "fields": [
+          "label": {
+            "en": "Road",
+            "fr": "Route"
+          }
+        },
         {
-          "key": "device",
-          "type": "select",
-          "source": "devices",
-          "label": { "en": "Device", "fr": "Appareil" },
-          "required": true
-        }
-      ],
-      "outputs": [
+          "key": "headline",
+          "type": "string",
+          "label": {
+            "en": "Headline (English)",
+            "fr": "Titre (anglais)"
+          }
+        },
         {
-          "key": "signalled",
+          "key": "description",
+          "type": "string",
+          "label": {
+            "en": "Description (English)",
+            "fr": "Description (anglais)"
+          }
+        },
+        {
+          "key": "event_type",
+          "type": "string",
+          "label": {
+            "en": "Event type",
+            "fr": "Type d'événement"
+          }
+        },
+        {
+          "key": "severity",
+          "type": "string",
+          "label": {
+            "en": "Severity",
+            "fr": "Gravité"
+          }
+        },
+        {
+          "key": "closed",
           "type": "boolean",
-          "label": { "en": "Device signalled", "fr": "Appareil signalé" }
+          "label": {
+            "en": "Road closed",
+            "fr": "Route fermée"
+          }
+        },
+        {
+          "key": "distance_km",
+          "type": "number",
+          "label": {
+            "en": "Distance from the zone center (km)",
+            "fr": "Distance au centre de la zone (km)"
+          }
+        },
+        {
+          "key": "delay_minutes",
+          "type": "number",
+          "label": {
+            "en": "Delay announced (minutes)",
+            "fr": "Retard annoncé (minutes)"
+          }
+        },
+        {
+          "key": "event_id",
+          "type": "string",
+          "label": {
+            "en": "DriveBC event id",
+            "fr": "Identifiant DriveBC de l'événement"
+          }
         }
       ]
-    }
-  ],
-  "widgets": [
-    {
-      "key": "demo_status",
-      "label": { "en": "Demo status", "fr": "État de la démo" },
-      "description": {
-        "en": "Live temperature and plug power, plug connection and observed location.",
-        "fr": "Température et puissance en direct, connexion de la prise, position observée."
-      },
-      "icon": "activity",
-      "action_timeout_seconds": 15
     }
   ]
 }

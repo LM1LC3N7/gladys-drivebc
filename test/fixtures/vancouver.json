@@ -1,0 +1,699 @@
+{
+  "capturedAt": "2026-10-29T21:17:25Z",
+  "note": "Real answer of the DriveBC Open511 API (Vancouver, 30 km box), trimmed to 16 events, lines thinned to 12 points. Open Government Licence - British Columbia.",
+  "date": "Thu, 29 Oct 2026 21:17:25 GMT",
+  "url": "https://api.open511.gov.bc.ca/events?format=json&status=ACTIVE&bbox=-123.5366%2C49.0129%2C-122.7048%2C49.5525&limit=500",
+  "body": {
+    "events": [
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-102273",
+        "id": "drivebc.ca/RIDE-102273",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-09-11T08:50:09-07:00",
+        "updated": "2026-09-11T08:56:44-07:00",
+        "description": "Bridge construction from Gilbert Road, In Richmond to Dinsmore Bridge, In Richmond. Starting Mon Sep 14 until Thu Dec 31. From 10:00 PM to 6:00 AM PDT the next day, Monday to Thursday and Sunday. Bridge closed. Detour in effect. Watch for traffic control. Last update: September 11th, 2026 at 8:56am PDT. Bridge will be open to traffic during the day. Detour via No. 2 Rd. Bridge.",
+        "+ivr_message": "Bridge construction from Gilbert Road, In Richmond to Dinsmore Bridge, In Richmond. Starting Mon Sep 14 until Thu Dec 31. From 10:00 PM to 6:00 AM PDT the next day, Monday to Thursday and Sunday. Bridge closed. Detour in effect. Watch for traffic control. Last update: September 11th, 2026 at 8:56am PDT. Bridge will be open to traffic during the day. Detour via No. 2 Rd. Bridge.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-09-15T05:00/2026-12-31T15:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["ROAD_CONSTRUCTION"],
+        "severity": "MINOR",
+        "geography": {
+          "type": "LineString",
+          "coordinates": [
+            [-123.15146, 49.18115],
+            [-123.15118, 49.1809],
+            [-123.15117, 49.18082],
+            [-123.15074, 49.18044],
+            [-123.15056, 49.18036],
+            [-123.15024, 49.18008],
+            [-123.14991, 49.1798],
+            [-123.14982, 49.17971],
+            [-123.14976, 49.17966],
+            [-123.14966, 49.17957],
+            [-123.14772, 49.17784],
+            [-123.14767, 49.17779]
+          ]
+        },
+        "roads": [
+          {
+            "name": "Other Roads",
+            "from": "Gilbert Road",
+            "direction": "BOTH",
+            "state": "CLOSED"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-103943",
+        "id": "drivebc.ca/RIDE-103943",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-10-20T16:35:28-07:00",
+        "updated": "2026-10-24T09:01:26-07:00",
+        "description": "Paving operations at Highway 1A, In Surrey. Starting 9:00 PM PDT on Friday October 30, 2026 until 5:00 AM MST on Monday November 2, 2026. Bridge closed. Watch for traffic control. Last update: October 24th, 2026 at 9:01am PDT. Northbound lanes will be closed; southbound lanes will remain open. Closure has been rescheduled for Oct 30 at 9pm to Nov 2 at 5am.",
+        "+ivr_message": "Paving operations at Highway 1A, In Surrey. Starting 9:00 PM PDT on Friday October 30, 2026 until 5:00 AM MST on Monday November 2, 2026. Bridge closed. Watch for traffic control. Last update: October 24th, 2026 at 9:01am PDT. Northbound lanes will be closed; southbound lanes will remain open. Closure has been rescheduled for Oct 30 at 9pm to Nov 2 at 5am.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-10-31T04:00/2026-11-02T13:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["PLANNED_EVENT"],
+        "severity": "MAJOR",
+        "geography": {
+          "type": "Point",
+          "coordinates": [-122.89256202, 49.20823425]
+        },
+        "roads": [
+          {
+            "name": "Highway 1A",
+            "from": "stal¿¿¿¿w¿¿as¿¿m Bridge",
+            "direction": "N",
+            "state": "CLOSED"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-104744",
+        "id": "drivebc.ca/RIDE-104744",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-10-29T12:19:12-07:00",
+        "updated": "2026-10-29T13:01:35-07:00",
+        "description": "Road maintenance at Kraus Road, At Kraus Road and Marlene Road. Starting 8:00 AM PCT on Monday November 2, 2026 until 4:00 PM PCT on Monday November 2, 2026. Road closure. Last update: October 29th, 2026 at 1:01pm PDT. Road closure/ local traffic only at the intersection of Kraus Road and Marlene Road for a culvert replacement.",
+        "+ivr_message": "Road maintenance at Kraus Road, At Kraus Road and Marlene Road. Starting 8:00 AM PCT on Monday November 2, 2026 until 4:00 PM PCT on Monday November 2, 2026. Road closure. Last update: October 29th, 2026 at 1:01pm PDT. Road closure/ local traffic only at the intersection of Kraus Road and Marlene Road for a culvert replacement.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-11-02T16:00/2026-11-03T00:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["PLANNED_EVENT"],
+        "severity": "MAJOR",
+        "geography": {
+          "type": "Point",
+          "coordinates": [-123.65837547, 49.42783165]
+        },
+        "roads": [
+          {
+            "name": "Other Roads",
+            "from": "Kraus Road",
+            "direction": "BOTH",
+            "state": "CLOSED"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-103094",
+        "id": "drivebc.ca/RIDE-103094",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-10-02T10:43:40-07:00",
+        "updated": "2026-10-16T13:46:02-07:00",
+        "description": "Night work from Highway 99, In Delta and At Ladner Trunk Rd to In Delta and At Highway 17. Starting Sun Oct 4 until Sun Nov 8. From 9:00 PM to 5:00 AM PDT the next day, Monday to Saturday. Watch for traffic control. Last update: October 16th, 2026 at 1:46pm PDT. One lane in each direction will remain open to traffic.",
+        "+ivr_message": "Night work from Highway 99, In Delta and At Ladner Trunk Rd to In Delta and At Highway 17. Starting Sun Oct 4 until Sun Nov 8. From 9:00 PM to 5:00 AM PDT the next day, Monday to Saturday. Watch for traffic control. Last update: October 16th, 2026 at 1:46pm PDT. One lane in each direction will remain open to traffic.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-10-05T04:00/2026-11-08T13:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["PLANNED_EVENT"],
+        "severity": "MAJOR",
+        "geography": {
+          "type": "LineString",
+          "coordinates": [
+            [-122.95936, 49.09056],
+            [-122.95945, 49.09056],
+            [-122.97943, 49.09056],
+            [-122.99545, 49.09056],
+            [-123.00045, 49.09056],
+            [-123.00357, 49.09092],
+            [-123.01423, 49.093],
+            [-123.02308, 49.09472],
+            [-123.02414, 49.09492],
+            [-123.0263, 49.09534],
+            [-123.02655, 49.09539],
+            [-123.02661, 49.09541]
+          ]
+        },
+        "roads": [
+          {
+            "name": "Highway 99",
+            "from": "Highway 99",
+            "direction": "BOTH",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-100084",
+        "id": "drivebc.ca/RIDE-100084",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-06-24T20:42:56-07:00",
+        "updated": "2026-07-16T23:27:09-07:00",
+        "description": "Bridge maintenance. Starting Thu Mar 26 until Sun Nov 15. From 9:30 PM to 9:00 AM PST on Saturday and Sunday. From 9:30 PM to 5:00 AM PST on Monday, Tuesday, Wednesday, Thursday, and Friday. Reduced to one lane each direction. Watch for crews and expect a speed limit reduction.",
+        "+ivr_message": "Bridge maintenance at Highway 91A, In New Westminster and Queensborough Bridge. Starting Thu Mar 26 until Sun Nov 15. From 9:30 PM to 9:00 AM PST on Saturday and Sunday. From 9:30 PM to 5:00 AM PST on Monday, Tuesday, Wednesday, Thursday, and Friday. Last update: July 16th, 2026 at 11:27pm. Reduced to one lane each direction. Watch for crews and expect a speed limit reduction.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-03-27T04:30/2026-11-15T14:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["ROAD_MAINTENANCE"],
+        "severity": "MAJOR",
+        "geography": {
+          "type": "Point",
+          "coordinates": [-122.94710751, 49.19625811]
+        },
+        "roads": [
+          {
+            "name": "Highway 91A",
+            "from": "Queensborough Bridge",
+            "direction": "BOTH",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-100092",
+        "id": "drivebc.ca/RIDE-100092",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-06-24T21:10:03-07:00",
+        "updated": "2026-07-16T23:20:12-07:00",
+        "description": "Construction work. Starting Fri Jun 5 until Sat Oct 31. Watch for traffic control. Lane shift in effect. Traffic will be detoured north of the highway to get by the work site. This will remain in effect 24/7.",
+        "+ivr_message": "Construction work from Highway 1, In Abbotsford and Bradner Rd to In Langley - District and 248th St. Starting Fri Jun 5 until Sat Oct 31. Watch for traffic control. Last update: July 16th, 2026 at 11:20pm. Lane shift in effect. Traffic will be detoured north of the highway to get by the work site. This will remain in effect 24/7.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-06-05T07:00/2026-10-31T07:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["ROAD_MAINTENANCE"],
+        "severity": "MAJOR",
+        "geography": {
+          "type": "LineString",
+          "coordinates": [
+            [-122.42641, 49.0757],
+            [-122.43125, 49.0776],
+            [-122.43665, 49.07972],
+            [-122.47944, 49.09652],
+            [-122.49072, 49.101],
+            [-122.4928, 49.10182],
+            [-122.50009, 49.10468],
+            [-122.50238, 49.10558],
+            [-122.50638, 49.10715],
+            [-122.51741, 49.11148],
+            [-122.52909, 49.11606],
+            [-122.53692, 49.11913]
+          ]
+        },
+        "roads": [
+          {
+            "name": "Highway 1",
+            "from": "Trans-Canada Highway",
+            "direction": "W",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-103597",
+        "id": "drivebc.ca/RIDE-103597",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-10-13T15:50:13-07:00",
+        "updated": "2026-10-26T09:12:27-07:00",
+        "description": "Bridge maintenance from Highway 1, Ironworkers Memorial Bridge  to Ironworkers Memorial Bridge. Starting 10:00 PM PDT on Tuesday October 27, 2026 until 5:00 AM PDT on Friday October 30, 2026. From 10:00 PM to 5:00 AM PDT the next day, Tuesday to Thursday. Centre lane closed. Right lane closed. Expect delays. Last update: October 26th, 2026 at 9:12am PDT.",
+        "+ivr_message": "Bridge maintenance from Highway 1, Ironworkers Memorial Bridge  to Ironworkers Memorial Bridge. Starting 10:00 PM PDT on Tuesday October 27, 2026 until 5:00 AM PDT on Friday October 30, 2026. From 10:00 PM to 5:00 AM PDT the next day, Tuesday to Thursday. Centre lane closed. Right lane closed. Expect delays. Last update: October 26th, 2026 at 9:12am PDT.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-10-28T05:00/2026-10-30T12:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["ROAD_MAINTENANCE"],
+        "severity": "MAJOR",
+        "geography": {
+          "type": "LineString",
+          "coordinates": [
+            [-123.02748, 49.3048],
+            [-123.02712, 49.30423],
+            [-123.02673, 49.3035],
+            [-123.02653, 49.30282],
+            [-123.02652, 49.30239],
+            [-123.02651, 49.30208],
+            [-123.02646, 49.29992],
+            [-123.02643, 49.29873],
+            [-123.02628, 49.29297],
+            [-123.02627, 49.29237],
+            [-123.02625, 49.29188],
+            [-123.02634, 49.29135]
+          ]
+        },
+        "roads": [
+          {
+            "name": "Highway 1",
+            "from": "Trans-Canada Highway",
+            "direction": "E",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-102762",
+        "id": "drivebc.ca/RIDE-102762",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-09-24T10:24:26-07:00",
+        "updated": "2026-09-24T10:24:26-07:00",
+        "description": "Road construction at University Boulevard, At Shortcut Road and University Boulevard. Starting Mon Sep 28 until Fri Oct 30. From 7:30 AM to 5:30 PM PDT, weekdays. Shoulder closed. Last update: September 24th, 2026 at 10:24am PDT. Crosswalk installation.",
+        "+ivr_message": "Road construction at University Boulevard, At Shortcut Road and University Boulevard. Starting Mon Sep 28 until Fri Oct 30. From 7:30 AM to 5:30 PM PDT, weekdays. Shoulder closed. Last update: September 24th, 2026 at 10:24am PDT. Crosswalk installation.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-09-28T14:30/2026-10-31T00:30"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["ROAD_CONSTRUCTION"],
+        "severity": "MINOR",
+        "geography": {
+          "type": "Point",
+          "coordinates": [-123.23536424, 49.26566074]
+        },
+        "roads": [
+          {
+            "name": "Other Roads",
+            "from": "University Boulevard",
+            "direction": "BOTH",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-100077",
+        "id": "drivebc.ca/RIDE-100077",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-06-24T20:16:46-07:00",
+        "updated": "2026-10-09T10:56:20-07:00",
+        "description": "Construction work at Howes Street, In New Westminster and Boyd Street. Starting Thu Apr 16 until Fri Nov 13. From 9:00 AM to 8:00 PM PDT, Saturday. From 7:00 AM to 8:00 PM PDT, weekdays. Last update: October 9th, 2026 at 10:56am PDT. Right turn lane closed and 30 km/h speed limit in effect 24/7.",
+        "+ivr_message": "Construction work at Howes Street, In New Westminster and Boyd Street. Starting Thu Apr 16 until Fri Nov 13. From 9:00 AM to 8:00 PM PDT, Saturday. From 7:00 AM to 8:00 PM PDT, weekdays. Last update: October 9th, 2026 at 10:56am PDT. Right turn lane closed and 30 km/h speed limit in effect 24/7.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-04-16T16:00/2026-11-14T05:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["ROAD_MAINTENANCE"],
+        "severity": "MINOR",
+        "geography": {
+          "type": "Point",
+          "coordinates": [-122.94833151, 49.18993898]
+        },
+        "roads": [
+          {
+            "name": "Other Roads",
+            "from": "Howes Street",
+            "direction": "BOTH",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-100075",
+        "id": "drivebc.ca/RIDE-100075",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-06-24T20:04:14-07:00",
+        "updated": "2026-06-26T10:48:10-07:00",
+        "description": "Construction work. Starting Sat Nov 15 until Mon Nov 15. Access to side lane closed. Eastbound lanes unaffected. Watch for crews.",
+        "+ivr_message": "Construction work at Highway 10, In Langley - City and 437m West of 200 St. Starting Sat Nov 15 until Mon Nov 15. Last update: June 26th, 2026 at 10:48am. Access to side lane closed. Eastbound lanes unaffected. Watch for crews.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2025-11-15T15:00/2027-11-15T16:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["PLANNED_EVENT"],
+        "severity": "MINOR",
+        "geography": {
+          "type": "Point",
+          "coordinates": [-122.6744016, 49.11229837]
+        },
+        "roads": [
+          {
+            "name": "Highway 10",
+            "from": "Langley Bypass",
+            "direction": "E",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-104147",
+        "id": "drivebc.ca/RIDE-104147",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-10-23T11:26:29-07:00",
+        "updated": "2026-10-23T11:27:27-07:00",
+        "description": "Shoulder maintenance from NW Marine Drive, At NW Marine Drive and West Mall to At Cecil Green Park Road and NW Marine Drive. Starting 7:00 AM PDT on Friday October 30, 2026 until 7:00 PM PDT on Friday October 30, 2026. From 7:00 AM to 7:00 PM PDT, Friday. Shoulder closed. Watch for traffic control. Last update: October 23rd, 2026 at 11:27am PDT.",
+        "+ivr_message": "Shoulder maintenance from NW Marine Drive, At NW Marine Drive and West Mall to At Cecil Green Park Road and NW Marine Drive. Starting 7:00 AM PDT on Friday October 30, 2026 until 7:00 PM PDT on Friday October 30, 2026. From 7:00 AM to 7:00 PM PDT, Friday. Shoulder closed. Watch for traffic control. Last update: October 23rd, 2026 at 11:27am PDT.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-10-30T14:00/2026-10-31T02:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["ROAD_MAINTENANCE"],
+        "severity": "MINOR",
+        "geography": {
+          "type": "LineString",
+          "coordinates": [
+            [-123.25886, 49.26865],
+            [-123.25885, 49.26865],
+            [-123.2582, 49.26903],
+            [-123.25724, 49.26951],
+            [-123.25497, 49.27064]
+          ]
+        },
+        "roads": [
+          {
+            "name": "Other Roads",
+            "from": "NW Marine Drive",
+            "direction": "W",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-103585",
+        "id": "drivebc.ca/RIDE-103585",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-10-13T10:48:42-07:00",
+        "updated": "2026-10-13T10:48:42-07:00",
+        "description": "Road construction from Highway 99, In Delta and Dease Slough Bridge to In Delta and George Massey Tunnel. Starting Thu Oct 1 until Mon Nov 30. From 8:00 PM to 5:00 AM PDT the next day, weekdays. Right lane closed. Watch for traffic control. Last update: October 13th, 2026 at 10:48am PDT.",
+        "+ivr_message": "Road construction from Highway 99, In Delta and Dease Slough Bridge to In Delta and George Massey Tunnel. Starting Thu Oct 1 until Mon Nov 30. From 8:00 PM to 5:00 AM PDT the next day, weekdays. Right lane closed. Watch for traffic control. Last update: October 13th, 2026 at 10:48am PDT.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-10-02T03:00/2026-11-30T13:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["ROAD_CONSTRUCTION"],
+        "severity": "MINOR",
+        "geography": {
+          "type": "LineString",
+          "coordinates": [
+            [-123.06679, 49.11479],
+            [-123.0675, 49.11536],
+            [-123.06771, 49.11553],
+            [-123.06874, 49.11636],
+            [-123.0692, 49.11673],
+            [-123.07132, 49.11844]
+          ]
+        },
+        "roads": [
+          {
+            "name": "Highway 99",
+            "from": "Dease Slough Bridge",
+            "direction": "N",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-103613",
+        "id": "drivebc.ca/RIDE-103613",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-10-13T19:20:05-07:00",
+        "updated": "2026-10-13T19:20:05-07:00",
+        "description": "Road construction from Highway 99, In Delta and Exit 29 (River Road) to Highway 17A, In Delta. Starting Wed Oct 14 until Mon Nov 30. Exit ramp closed. Right turn lane closed. Last update: October 13th, 2026 at 7:20pm PDT.",
+        "+ivr_message": "Road construction from Highway 99, In Delta and Exit 29 (River Road) to Highway 17A, In Delta. Starting Wed Oct 14 until Mon Nov 30. Exit ramp closed. Right turn lane closed. Last update: October 13th, 2026 at 7:20pm PDT.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-10-14T13:00/2026-11-30T22:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["ROAD_CONSTRUCTION"],
+        "severity": "MINOR",
+        "geography": {
+          "type": "LineString",
+          "coordinates": [
+            [-123.06618, 49.1141],
+            [-123.06617, 49.11409],
+            [-123.06516, 49.11324],
+            [-123.06363, 49.11195],
+            [-123.06232, 49.11084],
+            [-123.06156, 49.11032],
+            [-123.06084, 49.10997],
+            [-123.06084, 49.10997]
+          ]
+        },
+        "roads": [
+          {
+            "name": "Highway 99",
+            "from": "Highway 99",
+            "direction": "S",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-103353",
+        "id": "drivebc.ca/RIDE-103353",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-10-07T16:26:07-07:00",
+        "updated": "2026-10-07T16:26:29-07:00",
+        "description": "Utility work from Pratt Road, 3km West of Gibsons and At Fircrest Rd to At Fraser Rd. Starting Mon Oct 26 until Fri Nov 6. From 8:00 AM to 4:00 PM PDT, every day. Single lane alternating traffic. Watch for traffic control. Last update: October 7th, 2026 at 4:26pm PDT.",
+        "+ivr_message": "Utility work from Pratt Road, 3km West of Gibsons and At Fircrest Rd to At Fraser Rd. Starting Mon Oct 26 until Fri Nov 6. From 8:00 AM to 4:00 PM PDT, every day. Single lane alternating traffic. Watch for traffic control. Last update: October 7th, 2026 at 4:26pm PDT.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-10-26T15:00/2026-11-07T00:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["PLANNED_EVENT"],
+        "severity": "MINOR",
+        "geography": {
+          "type": "LineString",
+          "coordinates": [
+            [-123.52964, 49.39804],
+            [-123.52964, 49.39802],
+            [-123.52954, 49.39624],
+            [-123.52952, 49.39581],
+            [-123.5295, 49.39542],
+            [-123.52949, 49.39529]
+          ]
+        },
+        "roads": [
+          {
+            "name": "Other Roads",
+            "from": "Pratt Road",
+            "direction": "BOTH",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-101622",
+        "id": "drivebc.ca/RIDE-101622",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-08-24T11:15:12-07:00",
+        "updated": "2026-09-25T14:25:46-07:00",
+        "description": "Utility work from Highway 99, In Vancouver and W 70th Ave to In Vancouver and W 71 Ave. Starting Mon Aug 24 until Sat Oct 31. From 9:30 AM to 3:00 PM PDT, Monday to Thursday. Right lane closed. Last update: September 25th, 2026 at 2:25pm PDT.",
+        "+ivr_message": "Utility work from Highway 99, In Vancouver and W 70th Ave to In Vancouver and W 71 Ave. Starting Mon Aug 24 until Sat Oct 31. From 9:30 AM to 3:00 PM PDT, Monday to Thursday. Right lane closed. Last update: September 25th, 2026 at 2:25pm PDT.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-08-24T16:30/2026-10-31T22:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["ROAD_MAINTENANCE"],
+        "severity": "MINOR",
+        "geography": {
+          "type": "LineString",
+          "coordinates": [
+            [-123.13027, 49.20846],
+            [-123.13026, 49.20846],
+            [-123.1303, 49.20711]
+          ]
+        },
+        "roads": [
+          {
+            "name": "Highway 99",
+            "from": "Oak Street",
+            "direction": "N",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      },
+      {
+        "jurisdiction_url": "https://api.open511.gov.bc.ca/jurisdiction",
+        "url": "https://api.open511.gov.bc.ca/events/drivebc.ca/RIDE-103459",
+        "id": "drivebc.ca/RIDE-103459",
+        "headline": "CONSTRUCTION",
+        "status": "ACTIVE",
+        "created": "2026-10-09T11:02:47-07:00",
+        "updated": "2026-10-09T11:02:47-07:00",
+        "description": "Utility work from Highway 10, In Surrey and 184th Street to In Surrey and 188th Street. Starting Mon Oct 19 until Fri Oct 30. From 10:00 PM to 5:00 AM PDT the next day, weekdays. Right turn lane closed. Watch for traffic control. Last update: October 9th, 2026 at 11:02am PDT.",
+        "+ivr_message": "Utility work from Highway 10, In Surrey and 184th Street to In Surrey and 188th Street. Starting Mon Oct 19 until Fri Oct 30. From 10:00 PM to 5:00 AM PDT the next day, weekdays. Right turn lane closed. Watch for traffic control. Last update: October 9th, 2026 at 11:02am PDT.",
+        "+linear_reference_km": 0,
+        "schedule": {
+          "intervals": ["2026-10-20T05:59/2026-10-30T12:00"]
+        },
+        "event_type": "CONSTRUCTION",
+        "event_subtypes": ["PLANNED_EVENT"],
+        "severity": "MINOR",
+        "geography": {
+          "type": "LineString",
+          "coordinates": [
+            [-122.71234, 49.10405],
+            [-122.70684, 49.10407],
+            [-122.70199, 49.10408]
+          ]
+        },
+        "roads": [
+          {
+            "name": "Highway 10",
+            "from": "56 Avenue",
+            "direction": "E",
+            "state": "ALL_LANES_OPEN"
+          }
+        ],
+        "areas": [
+          {
+            "url": "http://www.geonames.org/8630136",
+            "name": "Lower Mainland District",
+            "id": "drivebc.ca/1"
+          }
+        ]
+      }
+    ],
+    "pagination": {
+      "offset": "0"
+    },
+    "meta": {
+      "url": "/events",
+      "up_url": "",
+      "version": "v1"
+    }
+  }
+}
