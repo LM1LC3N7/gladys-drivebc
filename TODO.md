@@ -67,3 +67,9 @@
   on a later page, and the unreadable check before `persist()` (which already refuses an unreadable /data).
 - **Counts of a failed read are never published** (nothing rather than 0); the status says since when.
 - **`connected`** shown when the last read of at least one zone succeeded less than 2 hours ago.
+
+## Next patch (review r3, 7218efa)
+
+- M1: `scheduleCycle` only logs an exception thrown inside a round and never re-arms; re-arm at the interval in the catch and say it in the status (reviewer's s18).
+- M2: tests for a fully unreadable page 2 (s17) and the French "périmé, plus de 2 h" text of a held 0 (s13 13K).
+- M4: a lone unreadable event fails its zone (status says so; accepted).
