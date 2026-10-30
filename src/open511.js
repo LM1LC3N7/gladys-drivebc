@@ -119,7 +119,11 @@ export async function getJson(url, { fetchImpl = fetch, timers = globalThis } = 
   }
 }
 
-/** The signature of "no event in this box": `{"error": "Error processing OP5 event data...", "error_code": 1008}`. */
+/**
+ * The signature of "no event in this box": `{"error": "Error processing OP5
+ * event data...", "error_code": 1008}`. Both are required; other keys added
+ * by DriveBC later are accepted.
+ */
 export const EMPTY_ERROR_CODE = 1008;
 const EMPTY_BODY_MAX = 4096;
 
@@ -138,8 +142,7 @@ async function isEmptyAnswer(response) {
     !Array.isArray(json) &&
     json.error_code === EMPTY_ERROR_CODE &&
     typeof json.error === 'string' &&
-    json.error.startsWith('Error processing OP5 event data') &&
-    Object.keys(json).length === 2
+    json.error.startsWith('Error processing OP5 event data')
   );
 }
 
@@ -319,9 +322,10 @@ export function readEvent(raw) {
 }
 
 /**
- * One page: `{ events, skipped, raw, hasMore }` or `null` when the envelope
- * is not an Open511 list of events (an error object, an HTML page...) or
- * when more than half of its events cannot be read.
+ * One page: `{ events, skipped, raw, hasMore }`, `{ unreadable, skipped, raw }`
+ * when more than half of its events cannot be read (never "no event"), or
+ * `null` when the envelope is not an Open511 list of events (an error
+ * object, an HTML page...).
  */
 export function readEventsPage(json) {
   if (!json || typeof json !== 'object' || Array.isArray(json)) return null;
@@ -335,7 +339,9 @@ export function readEventsPage(json) {
   }
   // A list made mostly of events that cannot be read is not "no event": the
   // format changed, or the answer is broken. Never published as 0.
-  if (json.events.length > 0 && skipped * 2 > json.events.length) return null;
+  if (json.events.length > 0 && skipped * 2 > json.events.length) {
+    return { unreadable: true, skipped, raw: json.events.length };
+  }
   const next =
     json.pagination && typeof json.pagination === 'object' ? json.pagination.next_url : undefined;
   // Only a full page announcing a next one is followed.

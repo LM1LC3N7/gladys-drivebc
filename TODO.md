@@ -49,7 +49,7 @@
 - **Test button = last read**: it never reads (the interval holds for it too).
 - **"No event" = HTTP 500 with `error_code` 1008** (review r1, seen live by the reviewer on a sea box and a land
   box): read as an empty list only for that exact body (`error` starting "Error processing OP5 event data" and
-  `error_code` the number 1008, nothing else); any other 500 stays an outage. A fall from N ≥ 1 to 0 through that
+  `error_code` the number 1008; other keys DriveBC may add are accepted); any other 500 stays an outage. A fall from N ≥ 1 to 0 through that
   answer is published only at the next scheduled read that says the same (no extra request); the previous count is
   the one published in this process, else the one Gladys holds.
 - **/data that cannot tell the last attempt** (unreadable, date in the future, not writable or frozen when written back at
@@ -58,9 +58,12 @@
 - **Pauses**: 429 (5 min doubled), 5xx (2 min doubled), other unexpected statuses (2 min doubled, own level), all
   bounded to 6 h; a refusal arriving after a config save or a reconnection still pauses, and holds any request of
   the new round; a round woken before the end of a pause is armed again, never skipped.
+- **Events that cannot be read** (more than half of a page): status "DriveBC sends events that cannot be read",
+  nothing published, no pause, read again at the interval.
 - **A server Date more than 24 h off** the local clock is taken as missing (every active event counts, no scene).
 - **Equivalent mutants** (no test can kill them, guards kept): the final 600-character cut of the summary (the loop
   already bounds every addition), the reset of the monotonic pause on a success (a read only succeeds once the
-  pause has ended) and the explicit end of the list on a 1008 past the first page (an empty page ends it as well).
+  pause has ended) the explicit end of the list on a 1008 past the first page (an empty page ends it as well), the `empty` flag
+  on a later page, and the unreadable check before `persist()` (which already refuses an unreadable /data).
 - **Counts of a failed read are never published** (nothing rather than 0); the status says since when.
 - **`connected`** shown when the last read of at least one zone succeeded less than 2 hours ago.

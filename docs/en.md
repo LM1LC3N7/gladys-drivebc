@@ -32,11 +32,11 @@ event without a readable schedule, or an answer without a readable server time, 
 more than a day away from the clock of Gladys is not believed (taken as unreadable).
 
 **No event**: DriveBC answers a box without any event with an HTTP 500 carrying the code 1008 ("Error processing
-OP5 event data"), never with an empty list (checked on the live API). The integration reads that exact answer as
+OP5 event data"), never with an empty list (observed on the live API in October 2026). The integration reads that exact answer as
 "no event"; any other 500 is an outage. When a zone that had events falls to "no event" through that answer, 0 is
 published only if the next scheduled read says the same (no extra request): one interval later. A first read, or a
-zone already at 0, is published at once. A list where more than half of the events cannot be read is an unreadable
-answer, never 0.
+zone already at 0, is published at once. A list where more than half of the events cannot be read is never 0: the status says that DriveBC sends events
+that cannot be read, nothing is published, and the reads go on at the interval (no pause).
 
 ## Scene trigger: "New DriveBC event in a zone"
 

@@ -22,3 +22,5 @@ the notes of the version's GitHub Release.
   the next read.
 - Restarts never read at once when `/data` cannot tell the last read; unexpected statuses (403, 404…) are spaced
   out like server errors; a server date more than a day off is not believed.
+- A zone whose events cannot be read is said so in the status (nothing published, no pause); a held fall to 0 is
+  said stale after 2 hours.

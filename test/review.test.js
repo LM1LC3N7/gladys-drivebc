@@ -67,11 +67,13 @@ test('only the exact 1008 signature is "no event": any other 500 is an outage', 
       ...init,
     });
   assert.deepEqual(await run(r(EMPTY_1008)).then((a) => [a.ok, a.empty]), [true, true]);
+  // A harmless key added later by DriveBC: still "no event".
+  const extra = await run(r({ ...EMPTY_1008, request_id: 'abc', events: [] }));
+  assert.deepEqual([extra.ok, extra.empty], [true, true]);
   for (const body of [
     { ...EMPTY_1008, error_code: 1009 },
     { ...EMPTY_1008, error_code: '1008' },
     { ...EMPTY_1008, error: 'Database down' },
-    { ...EMPTY_1008, events: [] },
     [EMPTY_1008],
     '<html>500 Internal Server Error</html>',
     `{"error_code": 1008, "error": "Error processing OP5 event data${' '.repeat(5000)}"}`,
@@ -322,7 +324,7 @@ test('a list made only of unreadable events is never published as 0', async () =
   assert.equal(fake.connectionStatus.connected, false);
   assert.match(
     fake.connectionStatus.message.en,
-    /Home: DriveBC answer not readable \(HTTP 200\); no data yet/,
+    /Home: DriveBC sends events that cannot be read \(its format may have changed\), nothing published; no data yet/,
   );
 });
 
@@ -539,4 +541,137 @@ test('a failing zone logs and says no coordinate', async () => {
   await begin();
   assert.ok(lines.some((line) => /read failed/.test(line)));
   assert.doesNotMatch(JSON.stringify([lines, fake.connectionStatuses]), /49\.123456|123\.654321/);
+});
+
+// --- Review r2 ----------------------------------------------------------------
+
+test('with /data unreadable, a config saved again or a reconnection after the first round never reads at once', async () => {
+  const store = createMemoryStore(undefined, { status: 'unreadable' });
+  const { app, api, wait } = await setup({ store });
+  await app.connected();
+  await wait(0);
+  await wait(3 * MINUTE + 10);
+  assert.equal(api.calls.length, 1);
+  const first = api.calls[0].at;
+  await wait(20 * SECOND);
+  await app.start({ ...HOME });
+  await wait(10 * SECOND);
+  await app.disconnected();
+  await app.connected();
+  await wait(0);
+  await wait(INTERVAL - 31 * SECOND);
+  assert.equal(api.calls.length, 1, 'no read before the interval from the first round');
+  await wait(2 * SECOND);
+  assert.equal(api.calls.length, 2);
+  assert.ok(api.calls[1].at - first >= INTERVAL);
+});
+
+test('a server Date 23 h off is believed, 25 h off is not', async () => {
+  const count = async (offset) => {
+    const api = createApi(() => json(page(), { date: CAPTURED_AT + offset }));
+    const { begin, fake } = await setup({ api });
+    await begin();
+    return published(fake, F(1, 'events'))[0];
+  };
+  const zone = normalizeConfig(HOME).zones[0];
+  const events = page().events.map(readEvent).filter(Boolean);
+  const at23 = matchZone(zone, events, CAPTURED_AT + 23 * HOUR).length;
+  const unknown = matchZone(zone, events, null).length;
+  assert.notEqual(at23, unknown, 'the fixture tells them apart');
+  assert.equal(await count(23 * HOUR), at23);
+  assert.equal(await count(-23 * HOUR), matchZone(zone, events, CAPTURED_AT - 23 * HOUR).length);
+  assert.equal(await count(25 * HOUR), unknown);
+  assert.equal(await count(-25 * HOUR), unknown);
+});
+
+test('exactly half of the events unreadable: the readable half is published', async () => {
+  const good = page().events.slice(0, 4);
+  const api = createApi(() => ({ events: [...good, {}, {}, {}, {}], pagination: { offset: 0 } }));
+  const { begin, fake } = await setup({ api });
+  await begin();
+  assert.equal(published(fake, F(1, 'events')).length, 1);
+});
+
+test('a single unreadable event in a quiet zone: said in the status, no pause, read at the interval', async () => {
+  const api = createApi(() => ({ events: [{ id: 'drivebc.ca/X' }], pagination: { offset: 0 } }));
+  const { begin, wait, fake } = await setup({ api });
+  await begin();
+  assert.equal(fake.states.length, 0);
+  assert.match(fake.connectionStatus.message.en, /DriveBC sends events that cannot be read/);
+  assert.doesNotMatch(fake.connectionStatus.message.en, /paused/);
+  await wait(INTERVAL);
+  assert.equal(api.calls.length, 2);
+});
+
+test('a zone moved while a fall to 0 is held starts afresh (no 0 published from the old area)', async () => {
+  const devices = createdDevices(HOME);
+  devices[0].features.find((f) => f.external_id === F(1, 'events')).last_value = 9;
+  let answer = () => page();
+  const api = createApi((url, a) => answer(a));
+  const { begin, wait, fake, app } = await setup({ api, devices });
+  await begin();
+  answer = empty1008;
+  await wait(INTERVAL);
+  assert.deepEqual(published(fake, F(1, 'events')), [9], 'held');
+  await app.start({ ...HOME, zone1_radius_km: 29 });
+  await wait(12 * SECOND);
+  assert.equal(api.calls.length, 3);
+  // The moved zone knows only the count Gladys holds (9): a new hold.
+  assert.deepEqual(published(fake, F(1, 'events')), [9]);
+  await wait(INTERVAL);
+  assert.deepEqual(published(fake, F(1, 'events')), [9, 0]);
+});
+
+test('a held fall to 0 older than 2 h is said stale', async () => {
+  let answer = () => page();
+  const api = createApi((url, a) => answer(a));
+  const { begin, wait, app } = await setup({ api });
+  await begin();
+  answer = empty1008;
+  await wait(INTERVAL);
+  await app.stop();
+  await wait(2 * HOUR + MINUTE);
+  const { connected, message } = app.composeStatus();
+  assert.equal(connected, false);
+  assert.match(
+    message.en,
+    /0 is published only if the next read says the same, read .* \(stale, over 2 h\)\./,
+  );
+});
+
+test('a round woken before its due time is armed again with a 5 ms margin', async () => {
+  const { begin, app, wait } = await setup();
+  await begin();
+  await wait(INTERVAL - SECOND);
+  app.cancelTimers();
+  const delays = [];
+  const schedule = app.scheduleCycle.bind(app);
+  app.scheduleCycle = (delay, gen) => {
+    delays.push(delay);
+    return schedule(delay, gen);
+  };
+  app.nextDueMono = app.monotonic() + 0.8;
+  await app.runCycle(app.gen);
+  assert.equal(delays.length, 1);
+  assert.ok(delays[0] >= 5 && delays[0] < 6, `${delays[0]}`);
+});
+
+test('distances are great-circle ones in every direction, 300 km at 60° N', () => {
+  // The exact destination 300 km away at a 60° bearing (spherical formula).
+  const R = 6371.0088;
+  const d = 300 / R;
+  const b = (60 * Math.PI) / 180;
+  const lat1 = (60 * Math.PI) / 180;
+  const lon1 = (-130 * Math.PI) / 180;
+  const lat2 = Math.asin(Math.sin(lat1) * Math.cos(d) + Math.cos(lat1) * Math.sin(d) * Math.cos(b));
+  const lon2 =
+    lon1 +
+    Math.atan2(
+      Math.sin(b) * Math.sin(d) * Math.cos(lat1),
+      Math.cos(d) - Math.sin(lat1) * Math.sin(lat2),
+    );
+  const km = distanceKm({ latitude: 60, longitude: -130 }, [
+    [[(lon2 * 180) / Math.PI, (lat2 * 180) / Math.PI]],
+  ]);
+  assert.ok(Math.abs(km - 300) < 0.01, `${km}`);
 });

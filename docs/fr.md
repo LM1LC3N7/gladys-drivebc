@@ -36,11 +36,12 @@ serveur lisible, compte comme en cours. Une heure de serveur à plus d'un jour d
 (prise comme illisible).
 
 **Aucun événement** : DriveBC répond à une boîte sans aucun événement par un HTTP 500 portant le code 1008
-(« Error processing OP5 event data »), jamais par une liste vide (vérifié sur l'API réelle). L'intégration lit cette
+(« Error processing OP5 event data »), jamais par une liste vide (observé sur l'API réelle en octobre 2026). L'intégration lit cette
 réponse exacte comme « aucun événement » ; tout autre 500 est une panne. Quand une zone qui avait des événements
 passe à « aucun événement » par cette réponse, 0 n'est publié que si la lecture prévue suivante dit pareil (sans
 requête de plus) : un intervalle plus tard. Une première lecture, ou une zone déjà à 0, est publiée aussitôt. Une liste
-dont plus de la moitié des événements est illisible est une réponse illisible, jamais 0.
+dont plus de la moitié des événements est illisible ne vaut jamais 0 : le statut dit que DriveBC envoie des événements
+illisibles, rien n'est publié, et les lectures continuent à l'intervalle (sans pause).
 
 ## Déclencheur de scène : « Nouvel événement DriveBC dans une zone »
 

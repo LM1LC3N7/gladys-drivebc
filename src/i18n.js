@@ -157,6 +157,10 @@ const FAILURES = {
   server: { en: 'DriveBC server error', fr: 'erreur du serveur DriveBC' },
   http: { en: 'unexpected answer from DriveBC', fr: 'réponse inattendue de DriveBC' },
   format: { en: 'DriveBC answer not readable', fr: 'réponse de DriveBC illisible' },
+  unreadable_events: {
+    en: 'DriveBC sends events that cannot be read (its format may have changed), nothing published',
+    fr: 'DriveBC envoie des événements illisibles (son format a peut-être changé), rien publié',
+  },
   too_big: { en: 'DriveBC answer too large', fr: 'réponse de DriveBC trop grande' },
   too_many: {
     en: 'more than 2000 events in the zone, reduce its radius',

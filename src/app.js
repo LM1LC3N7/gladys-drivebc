@@ -573,6 +573,9 @@ export class DriveBcApp {
       if (answer.empty && page > 0) return { ok: true, events, at, skipped, empty: false };
       const read = readEventsPage(answer.json);
       if (!read) return { ok: false, kind: 'format', status: 200 };
+      // Events DriveBC sends but that cannot be read: said as such, nothing
+      // published, no pause (the source answered; its format may have changed).
+      if (read.unreadable) return { ok: false, kind: 'unreadable_events' };
       if (page === 0) at = answer.serverDate;
       events.push(...read.events);
       skipped += read.skipped;
@@ -767,10 +770,11 @@ export class DriveBcApp {
         continue;
       }
       if (result.ok && result.held) {
-        if (mono - result.readMono <= STALE_AFTER) anyOk = true;
+        const stale = mono - result.readMono > STALE_AFTER;
+        if (!stale) anyOk = true;
         push(
-          `${name.en}: DriveBC answers "no event" after ${result.previous} event(s); 0 is published only if the next read says the same, read ${formatTime(result.readAt, 'en')}.`,
-          `${name.fr} : DriveBC répond « aucun événement » après ${result.previous} événement(s) ; 0 n'est publié que si la lecture suivante dit pareil, lu ${formatTime(result.readAt, 'fr')}.`,
+          `${name.en}: DriveBC answers "no event" after ${result.previous} event(s); 0 is published only if the next read says the same, read ${formatTime(result.readAt, 'en')}${stale ? ' (stale, over 2 h)' : ''}.`,
+          `${name.fr} : DriveBC répond « aucun événement » après ${result.previous} événement(s) ; 0 n'est publié que si la lecture suivante dit pareil, lu ${formatTime(result.readAt, 'fr')}${stale ? ' (périmé, plus de 2 h)' : ''}.`,
         );
         continue;
       }
