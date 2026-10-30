@@ -136,11 +136,21 @@ test('a restart never reads sooner than the interval (time of the last attempt i
   assert.equal(second.api.calls.length, 1);
 });
 
-test('a date of /data in the future is invalid: ignored', async () => {
+test('a date of /data in the future is not believed: the first read waits 3 min after the start', async () => {
   const store = createMemoryStore({ lastAttemptAt: CAPTURED_AT + HOUR });
-  const { begin, api } = await setup({ store });
+  const { begin, api, wait, fake } = await setup({ store });
   await begin();
+  assert.equal(api.calls.length, 0);
+  assert.match(
+    fake.connectionStatus.message.en,
+    /\/data does not tell when DriveBC was last read: the first read waits 3 min/,
+  );
+  await wait(3 * MINUTE - 10);
+  assert.equal(api.calls.length, 0);
+  await wait(20);
   assert.equal(api.calls.length, 1);
+  await wait(INTERVAL);
+  assert.equal(api.calls.length, 2, 'then the interval');
 });
 
 test('the attempt time is saved before the request', async () => {
@@ -250,7 +260,7 @@ test('a 429 pauses every read (5 min, doubled), kept in /data across a restart',
   assert.equal(fake.connectionStatus.connected, false);
   assert.match(
     fake.connectionStatus.message.en,
-    /DriveBC asked to slow down: reads paused until Oct 29, 14:22 PT\./,
+    /DriveBC asked to slow down \(429\): reads paused until Oct 29, 14:22 PT\./,
   );
   assert.match(
     fake.connectionStatus.message.en,
@@ -468,6 +478,9 @@ test('an unreadable /data is never overwritten; the app runs from memory and say
   const store = createMemoryStore(undefined, { status: 'unreadable' });
   const { begin, fake, wait, api } = await setup({ store });
   await begin();
+  assert.equal(api.calls.length, 0, 'never at once: /data cannot tell the last read');
+  await wait(3 * MINUTE + 10);
+  assert.equal(api.calls.length, 1);
   await wait(INTERVAL);
   assert.equal(api.calls.length, 2);
   assert.equal(store.saves, 0);
@@ -481,9 +494,15 @@ test('an unreadable /data is never overwritten; the app runs from memory and say
 test('a failing or frozen /data never holds the reads back', async () => {
   const store = createMemoryStore();
   store.failSave = true;
-  const { begin, wait, api } = await setup({ store });
+  const { begin, wait, api, fake } = await setup({ store });
   await begin();
+  assert.equal(api.calls.length, 0, 'a /data that cannot be written: no read at once');
+  await wait(3 * MINUTE + 10);
   assert.equal(api.calls.length, 1);
+  assert.match(
+    fake.connectionStatus.message.en,
+    /could not be written in \/data: a restart may read sooner/,
+  );
   store.failSave = false;
   store.hold = new Promise(() => {});
   await wait(INTERVAL);

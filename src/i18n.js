@@ -166,7 +166,8 @@ const FAILURES = {
 
 export function failure(kind, status, lang) {
   const text = FAILURES[kind]?.[lang] ?? FAILURES.http[lang];
-  return status && kind !== 'rate' ? `${text} (HTTP ${status})` : text;
+  const full = status && kind !== 'rate' ? `${text} (HTTP ${status})` : text;
+  return full.charAt(0).toUpperCase() + full.slice(1);
 }
 
 /** The bilingual messages of the status and the test button. */

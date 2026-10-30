@@ -48,8 +48,17 @@ test('distances: a point, and a line passing near the center (not only its ends)
       [-122, 49.1],
     ],
   });
+  // Two points 146 km apart: the segment between them, not only its ends
+  // (a long straight segment bends a little on the plane: 0.5 km here).
   const near = distanceKm(center, line);
-  assert.ok(Math.abs(near - 11.12) < 0.1, `${near}`);
+  assert.ok(Math.abs(near - 11.12) < 0.6, `${near}`);
+  // DriveBC lines are dense: exact to 10 m.
+  const dense = Array.from({ length: 21 }, (_, i) => [-124 + i * 0.1, 49.1]);
+  const exact = distanceKm(center, [dense]);
+  assert.ok(Math.abs(exact - 11.1195) < 0.01, `${exact}`);
+  // A point is exact (great circle), even 300 km away at 60° N.
+  const far = distanceKm({ latitude: 60, longitude: -130 }, [[[-130, 60 + 300 / 111.19508]]]);
+  assert.ok(Math.abs(far - 300) < 0.01, `${far}`);
   assert.deepEqual(
     readGeometry({ type: 'MultiLineString', coordinates: [[[-123, 49]], [[-122, 49]]] }),
     [[[-123, 49]], [[-122, 49]]],

@@ -77,15 +77,29 @@ export function readGeometry(geography) {
 
 /**
  * The distance in km from the zone center to the nearest point of the
- * geometry (segments included), on a plane tangent at the center: exact to
- * well under 1 % over the 300 km a zone may span.
+ * geometry (segments included). Each point is placed on an azimuthal
+ * equidistant plane centered on the zone (great-circle distance and bearing
+ * from the center): exact for the points themselves; between two points of a
+ * line, the straight segment of that plane is a close approximation.
  */
 export function distanceKm(center, lines) {
-  const cos = Math.cos(center.latitude * RAD);
-  const project = ([lon, lat]) => [
-    (lon - center.longitude) * cos * KM_PER_DEGREE,
-    (lat - center.latitude) * KM_PER_DEGREE,
-  ];
+  const lat0 = center.latitude * RAD;
+  const lon0 = center.longitude * RAD;
+  const sin0 = Math.sin(lat0);
+  const cos0 = Math.cos(lat0);
+  const project = ([lon, lat]) => {
+    const phi = lat * RAD;
+    const dLon = lon * RAD - lon0;
+    const sinPhi = Math.sin(phi);
+    const cosPhi = Math.cos(phi);
+    const h = Math.sin((phi - lat0) / 2) ** 2 + cos0 * cosPhi * Math.sin(dLon / 2) ** 2;
+    const d = 2 * EARTH_KM * Math.asin(Math.min(1, Math.sqrt(h)));
+    const bearing = Math.atan2(
+      Math.sin(dLon) * cosPhi,
+      cos0 * sinPhi - sin0 * cosPhi * Math.cos(dLon),
+    );
+    return [d * Math.sin(bearing), d * Math.cos(bearing)];
+  };
   let best = Infinity;
   for (const line of lines) {
     let previous = null;

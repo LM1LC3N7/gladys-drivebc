@@ -32,7 +32,15 @@ textes de DriveBC restent en anglais, seule langue de l'API.
 serveur de DriveBC (en-tête `Date`). Un événement prévu plus tard n'est compté qu'au début de son intervalle. Les
 horaires quotidiens écrits seulement dans la description (« 7:00 AM to 7:00 PM, weekdays ») ne sont pas lus : un tel
 événement compte pendant tout son intervalle. Un événement sans calendrier lisible, ou une réponse sans heure de
-serveur lisible, compte comme en cours.
+serveur lisible, compte comme en cours. Une heure de serveur à plus d'un jour de l'horloge de Gladys n'est pas crue
+(prise comme illisible).
+
+**Aucun événement** : DriveBC répond à une boîte sans aucun événement par un HTTP 500 portant le code 1008
+(« Error processing OP5 event data »), jamais par une liste vide (vérifié sur l'API réelle). L'intégration lit cette
+réponse exacte comme « aucun événement » ; tout autre 500 est une panne. Quand une zone qui avait des événements
+passe à « aucun événement » par cette réponse, 0 n'est publié que si la lecture prévue suivante dit pareil (sans
+requête de plus) : un intervalle plus tard. Une première lecture, ou une zone déjà à 0, est publiée aussitôt. Une liste
+dont plus de la moitié des événements est illisible est une réponse illisible, jamais 0.
 
 ## Déclencheur de scène : « Nouvel événement DriveBC dans une zone »
 
@@ -67,12 +75,18 @@ DriveBC limite son API et demande d'espacer les requêtes d'au moins 10 secondes
   une zone de plus de 500 événements prend une requête de plus par 500, jusqu'à 2000) ;
 - commence un tour à chaque intervalle, mesuré depuis le début du tour précédent ;
 - ne lit pas plus tôt après un redémarrage, une reconnexion à Gladys, une configuration enregistrée sans changement,
-  une Découverte ou le bouton de test (l'heure de la dernière tentative est gardée dans `/data`) ; déplacer une zone
-  la lit aussitôt, 12 secondes après la dernière requête ;
+  une Découverte ou le bouton de test (l'heure de la dernière tentative est gardée dans `/data`, et en mémoire) ;
+  déplacer une zone la lit aussitôt, 12 secondes après la dernière requête ;
+- quand `/data` ne peut pas dire la dernière tentative (fichier illisible, date dans le futur, `/data` non inscriptible
+  ou qui ne répond pas en 2 secondes), attend 3 minutes après le démarrage avant la première lecture, et le dit dans
+  le statut ; un `/data` qui cesse d'être inscriptible plus tard est dit aussi dans le statut : un redémarrage peut
+  alors lire plus tôt ;
 - après un **429** (« trop de requêtes »), met toutes les lectures en pause 5 minutes, puis 10, 20… jusqu'à 6 heures ;
-  après une erreur du serveur (**5xx**), 2 minutes, puis 4, 8… jusqu'à 6 heures ; un `Retry-After` plus long est
-  respecté, jusqu'à 6 heures. La pause est gardée dans `/data` d'un redémarrage à l'autre ; le doublement repart de zéro
-  après une lecture réussie ;
+  après une erreur du serveur (**5xx**, hors réponse « aucun événement ») ou un autre statut inattendu (400, 403,
+  404…), 2 minutes, puis 4, 8… jusqu'à 6 heures ; un `Retry-After` plus long est respecté, jusqu'à 6 heures. Un refus
+  qui arrive pendant l'enregistrement de la configuration, ou une reconnexion de Gladys, lance quand même la pause.
+  La pause est gardée dans `/data` d'un redémarrage à l'autre ; le doublement repart de zéro après une lecture
+  réussie ;
 - se présente avec le User-Agent `gladys-drivebc/<version> (+https://github.com/LM1LC3N7/gladys-drivebc)` ;
 - coupe une réponse après 30 secondes ou 16 Mo.
 
@@ -83,7 +97,7 @@ DriveBC n'offre ni `ETag` ni `Last-Modified` sur ses événements : chaque tour 
 L'écran de configuration montre, pour chaque zone, les comptes de la dernière lecture et son heure (heure du
 Pacifique), ou la raison de l'échec et l'heure des dernières données. Des données de plus de 2 heures sont dites
 périmées. Quand une lecture échoue, rien n'est publié pour cette zone : les appareils gardent leurs dernières
-valeurs et le statut dit depuis quand. L'intégration est montrée connectée quand la dernière lecture d'au moins une
+valeurs et le statut dit depuis quand. Un passage à 0 qui attend sa confirmation est dit aussi. L'intégration est montrée connectée quand la dernière lecture d'au moins une
 zone a réussi, il y a moins de 2 heures.
 
 ## Vie privée
@@ -100,5 +114,5 @@ ses coordonnées.
 - Essayée contre la vraie API de DriveBC le 2026-10-29 ; pas encore essayée par un utilisateur en
   Colombie-Britannique.
 - Les textes de DriveBC sont en anglais seulement.
-- Une réponse vide de DriveBC se lit « aucun événement » : l'intégration ne peut pas la distinguer d'une panne de
-  DriveBC qui renverrait une liste vide.
+- « Aucun événement » est le HTTP 500 au code 1008 de DriveBC : si DriveBC envoyait un jour cette réponse exacte
+  pendant une panne, une zone montrerait 0 après deux telles lectures de suite (à un intervalle d'écart).

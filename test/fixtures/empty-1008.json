@@ -1,0 +1,5 @@
+{
+  "note": "Real answer of the DriveBC Open511 API to a box without any event (sea box [-130.1,48.0,-130.0,48.1] and a land box in the Chilcotin, 2026-10-29): HTTP 500 with this body.",
+  "status": 500,
+  "body": { "error": "Error processing OP5 event data: See log for details.", "error_code": 1008 }
+}

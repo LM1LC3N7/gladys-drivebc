@@ -31,6 +31,7 @@ import {
   PAUSE_5XX_FIRST,
   PAUSE_MAX,
   PAUSE_MIN,
+  REFRESH_MIN,
   REQUEST_GAP,
   SCENE_EVENTS_PER_READ,
   SCENE_TEXT_MAX,
@@ -53,6 +54,18 @@ const STATUS_MAX = 1500;
 const LANGS = ['en', 'fr'];
 
 const isTime = (value) => Number.isFinite(value) && value > 0;
+/** The answers that pause every read: 429, 5xx, other unexpected statuses. */
+const PAUSING = ['rate', 'server', 'http'];
+/** A server `Date` further than this from the local clock is not believed. */
+const DATE_SANITY = 24 * 60 * MINUTE;
+const NO_PAUSE = () => ({
+  until: null,
+  kind: null,
+  status: null,
+  level429: 0,
+  level5xx: 0,
+  levelHttp: 0,
+});
 
 export class DriveBcApp {
   constructor({
@@ -95,6 +108,16 @@ export class DriveBcApp {
     this.loaded = false;
     this.storeStatus = 'absent';
     this.persisted = { zones: {} };
+
+    /** The start of the process, and the last round started in it. */
+    this.startMono = this.monotonic();
+    this.lastAttemptMono = null;
+    /** Whether /data tells the last attempt (null: not known yet). */
+    this.dataTells = null;
+    this.saveFailed = false;
+    /** Per zone: the events count last published, and a fall to 0 waiting. */
+    this.lastEvents = new Map();
+    this.pendingZero = new Set();
   }
 
   // --- Lifecycle -------------------------------------------------------------
@@ -227,8 +250,12 @@ export class DriveBcApp {
     for (const slot of this.zoneResults.keys()) {
       if (this.zoneResults.get(slot).fingerprint !== fingerprints.get(slot)) {
         this.zoneResults.delete(slot);
+        this.lastEvents.delete(slot);
+        this.pendingZero.delete(slot);
       }
     }
+    if (this.dataTells === null) await this.checkData();
+    if (gen !== this.gen) return;
     const changed =
       this.lastFingerprints !== null &&
       JSON.stringify([...fingerprints]) !== JSON.stringify([...this.lastFingerprints]);
@@ -240,8 +267,18 @@ export class DriveBcApp {
     const interval = config.refreshMinutes * MINUTE;
     let wait = 0;
     const last = this.persisted.lastAttemptAt;
-    // A date of /data in the future is invalid: ignored.
-    if (!changed && isTime(last) && last <= wall) wait = Math.max(0, last + interval - wall);
+    if (!changed) {
+      if (this.lastAttemptMono !== null) {
+        // A round already ran in this process: its monotonic time decides.
+        wait = Math.max(0, this.lastAttemptMono + interval - mono);
+      } else if (!this.dataTells) {
+        // /data cannot tell the last attempt (unreadable, not writable, a
+        // date in the future): a restart never reads at once.
+        wait = Math.max(0, this.startMono + REFRESH_MIN * MINUTE - mono);
+      } else if (isTime(last)) {
+        wait = Math.max(0, last + interval - wall);
+      }
+    }
     const pause = this.persisted.pause;
     if (pause && isTime(pause.until) && pause.until > wall && pause.until - wall <= PAUSE_MAX) {
       const left = pause.until - wall;
@@ -256,6 +293,24 @@ export class DriveBcApp {
     await this.updateStatus(gen);
     if (gen !== this.gen) return;
     this.scheduleCycle(wait, gen);
+  }
+
+  /**
+   * Whether /data tells when DriveBC was last read: readable, with no date in
+   * the future, and writable (checked by writing it back before any read).
+   */
+  async checkData() {
+    const last = this.persisted.lastAttemptAt;
+    if (this.storeStatus === 'unreadable') this.dataTells = false;
+    else if (isTime(last) && last > this.now()) {
+      this.logger.warn('The last attempt in /data is in the future: not believed');
+      this.dataTells = false;
+    } else {
+      // Readable is not enough: a /data that cannot be written (read-only,
+      // frozen) would keep an old attempt time and let every restart read.
+      this.dataTells = await this.persist();
+      if (!this.dataTells) this.saveFailed = true;
+    }
   }
 
   scheduleCycle(delay, gen) {
@@ -294,8 +349,16 @@ export class DriveBcApp {
       const level = (n) => (Number.isInteger(n) && n >= 0 && n <= 30 ? n : 0);
       persisted.pause = {
         until: isTime(data.pause.until) ? data.pause.until : null,
+        kind: PAUSING.includes(data.pause.kind) ? data.pause.kind : 'rate',
+        status:
+          Number.isInteger(data.pause.status) &&
+          data.pause.status >= 100 &&
+          data.pause.status <= 599
+            ? data.pause.status
+            : null,
         level429: level(data.pause.level429),
         level5xx: level(data.pause.level5xx),
+        levelHttp: level(data.pause.levelHttp),
       };
     }
     if (typeof data.salt === 'string' && /^[0-9a-f]{32}$/.test(data.salt))
@@ -384,12 +447,29 @@ export class DriveBcApp {
 
   async runCycle(gen) {
     if (gen !== this.gen) return;
+    // A timer may fire a little before the end of a pause: armed again for
+    // what is left, the round is never skipped for it.
+    // The same for the interval itself: never a round before it is due.
+    const mono0 = this.monotonic();
+    const left = Math.max(this.pausedFor(mono0), (this.nextDueMono ?? mono0) - mono0);
+    if (left > 0) {
+      this.nextDueMono = mono0 + left;
+      this.scheduleCycle(left + 5, gen);
+      return;
+    }
+    await this.round(gen);
+  }
+
+  /** One round: every zone, one request at a time. */
+  async round(gen) {
     const config = this.config;
     const start = this.monotonic();
+    this.lastAttemptMono = start;
     this.nextDueMono = start + config.refreshMinutes * MINUTE;
     // The time of the attempt is in /data before the first request.
     this.persisted.lastAttemptAt = this.now();
-    await this.persist();
+    const saved = await this.persist();
+    this.saveFailed = !saved && this.storeStatus !== 'unreadable';
     if (gen !== this.gen) return;
     for (const zone of config.zones) {
       if (this.pausedFor() > 0) {
@@ -397,8 +477,18 @@ export class DriveBcApp {
         continue;
       }
       const result = await this.readZone(zone, gen);
+      // A refusal of the source pauses the reads even when the configuration
+      // changed or Gladys reconnected while the request was out.
+      if (!result.ok && PAUSING.includes(result.kind)) {
+        this.startPause(result);
+        if (gen !== this.gen) {
+          await this.persist();
+          return;
+        }
+      }
       if (gen !== this.gen) return;
       if (result.ok) {
+        result.at = this.believableDate(result.at);
         await this.onZoneRead(zone, result, gen);
         if (gen !== this.gen) return;
       } else {
@@ -414,9 +504,20 @@ export class DriveBcApp {
       this.nextDueMono = mono + delay;
     }
     this.scheduleCycle(delay, gen);
-    await this.persist();
+    const savedAfter = await this.persist();
+    if (this.storeStatus !== 'unreadable') this.saveFailed = this.saveFailed || !savedAfter;
     if (gen !== this.gen) return;
     await this.updateStatus(gen);
+  }
+
+  /** A server date more than a day away from the local clock is not believed. */
+  believableDate(at) {
+    if (at === null) return null;
+    if (Math.abs(at - this.now()) > DATE_SANITY) {
+      this.logger.warn('The Date of the DriveBC answer is more than a day off: not used');
+      return null;
+    }
+    return at;
   }
 
   /** The pause left, in ms (0 when none). */
@@ -443,6 +544,8 @@ export class DriveBcApp {
       }
       break;
     }
+    // A pause started meanwhile (a late 429 of an older round) holds this one.
+    if (this.pausedFor() > 0) return { ok: false, kind: 'paused' };
     this.lastRequestMono = this.monotonic();
     const job = getJson(url, { fetchImpl: this.fetchImpl, timers: this.timers });
     this.inflight = job.then(
@@ -466,17 +569,21 @@ export class DriveBcApp {
       const answer = await this.request(eventsUrl(bbox, page * PAGE_LIMIT, this.apiBase), gen);
       if (answer === null) return { ok: false, kind: 'stopped' };
       if (!answer.ok) return answer;
+      // "No event" past the first page: the end of the list.
+      if (answer.empty && page > 0) return { ok: true, events, at, skipped, empty: false };
       const read = readEventsPage(answer.json);
       if (!read) return { ok: false, kind: 'format', status: 200 };
       if (page === 0) at = answer.serverDate;
       events.push(...read.events);
       skipped += read.skipped;
-      if (!read.hasMore) return { ok: true, events, at, skipped };
+      if (!read.hasMore) {
+        return { ok: true, events, at, skipped, empty: page === 0 && answer.empty === true };
+      }
     }
     return { ok: false, kind: 'too_many' };
   }
 
-  async onZoneRead(zone, { events, at, skipped }, gen) {
+  async onZoneRead(zone, { events, at, skipped, empty }, gen) {
     const language = this.config.language;
     const matches = matchZone(zone, events, at);
     const c = counts(matches);
@@ -485,7 +592,25 @@ export class DriveBcApp {
       this.logger.info(`Zone ${zone.slot}: ${skipped} event(s) without id or place ignored`);
     // Success resets the pauses.
     this.pauseUntilMono = null;
-    if (this.persisted.pause) this.persisted.pause = { until: null, level429: 0, level5xx: 0 };
+    if (this.persisted.pause) this.persisted.pause = NO_PAUSE();
+    const previous = this.lastEvents.get(zone.slot) ?? this.publishedEvents(ids);
+    // A fall to 0 told by the "no event" answer (1008) of DriveBC is
+    // published only when the next read says the same.
+    if (empty && c.events === 0 && previous >= 1 && !this.pendingZero.has(zone.slot)) {
+      this.pendingZero.add(zone.slot);
+      this.logger.info(`Zone ${zone.slot}: DriveBC answers no event; waiting for the next read`);
+      this.zoneResults.set(zone.slot, {
+        fingerprint: this.fingerprint(zone),
+        ok: true,
+        held: true,
+        previous,
+        readAt: this.now(),
+        readMono: this.monotonic(),
+        counts: null,
+      });
+      return;
+    }
+    this.pendingZero.delete(zone.slot);
     this.zoneResults.set(zone.slot, {
       fingerprint: this.fingerprint(zone),
       ok: true,
@@ -493,6 +618,7 @@ export class DriveBcApp {
       readMono: this.monotonic(),
       counts: c,
     });
+    this.lastEvents.set(zone.slot, c.events);
     const created = this.gladys.devices?.some((device) => device.external_id === ids.device);
     if (created) {
       try {
@@ -556,11 +682,18 @@ export class DriveBcApp {
     }
   }
 
+  /** The events count Gladys holds for a zone (after a restart), or null. */
+  publishedEvents(ids) {
+    const device = this.gladys.devices?.find((d) => d.external_id === ids.device);
+    const feature = device?.features?.find((f) => f.external_id === ids.feature(FEATURES.EVENTS));
+    const value = feature?.last_value;
+    return typeof value === 'number' && Number.isFinite(value) ? value : null;
+  }
+
   onZoneFailed(zone, result) {
     this.logger.warn(
       `Zone ${zone.slot}: read failed (${result.kind}${result.status ? ` ${result.status}` : ''})`,
     );
-    if (result.kind === 'rate' || result.kind === 'server') this.startPause(result);
     this.recordFailure(zone, result);
   }
 
@@ -579,15 +712,21 @@ export class DriveBcApp {
   }
 
   startPause(result) {
-    const pause = this.persisted.pause ?? { until: null, level429: 0, level5xx: 0 };
+    const pause = this.persisted.pause ?? NO_PAUSE();
     let duration;
     if (result.kind === 'rate') {
       pause.level429 = Math.min(pause.level429 + 1, 30);
       duration = PAUSE_429_FIRST * 2 ** (pause.level429 - 1);
-    } else {
+    } else if (result.kind === 'server') {
       pause.level5xx = Math.min(pause.level5xx + 1, 30);
       duration = PAUSE_5XX_FIRST * 2 ** (pause.level5xx - 1);
+    } else {
+      // 400, 403, 404...: spaced out like a server error.
+      pause.levelHttp = Math.min(pause.levelHttp + 1, 30);
+      duration = PAUSE_5XX_FIRST * 2 ** (pause.levelHttp - 1);
     }
+    pause.kind = result.kind;
+    pause.status = Number.isInteger(result.status) ? result.status : null;
     if (Number.isFinite(result.retryAfter) && result.retryAfter > duration)
       duration = result.retryAfter;
     duration = Math.min(PAUSE_MAX, Math.max(PAUSE_MIN, duration));
@@ -613,9 +752,11 @@ export class DriveBcApp {
     if (!config) return { connected: false, message: M.starting };
     const paused = this.pausedFor(mono);
     if (paused > 0) {
+      const kind = this.persisted.pause?.kind ?? 'rate';
+      const status = this.persisted.pause?.status ?? null;
       push(
-        `${failure('rate', null, 'en').replace(' (429)', '')}: reads paused until ${formatTime(wall + paused, 'en')}.`,
-        `${failure('rate', null, 'fr').replace(' (429)', '')} : lectures en pause jusqu'à ${formatTime(wall + paused, 'fr')}.`,
+        `${failure(kind, status, 'en')}: reads paused until ${formatTime(wall + paused, 'en')}.`,
+        `${failure(kind, status, 'fr')} : lectures en pause jusqu'à ${formatTime(wall + paused, 'fr')}.`,
       );
     }
     for (const zone of config.zones) {
@@ -623,6 +764,14 @@ export class DriveBcApp {
       const result = this.zoneResults.get(zone.slot);
       if (!result) {
         push(`${name.en}: no read yet.`, `${name.fr} : pas encore lue.`);
+        continue;
+      }
+      if (result.ok && result.held) {
+        if (mono - result.readMono <= STALE_AFTER) anyOk = true;
+        push(
+          `${name.en}: DriveBC answers "no event" after ${result.previous} event(s); 0 is published only if the next read says the same, read ${formatTime(result.readAt, 'en')}.`,
+          `${name.fr} : DriveBC répond « aucun événement » après ${result.previous} événement(s) ; 0 n'est publié que si la lecture suivante dit pareil, lu ${formatTime(result.readAt, 'fr')}.`,
+        );
         continue;
       }
       if (result.ok) {
@@ -662,6 +811,18 @@ export class DriveBcApp {
     if (config.errors.length > 0) {
       const errors = configErrors(config.errors);
       push(`Configuration: ${errors.en}.`, `Configuration : ${errors.fr}.`);
+    }
+    if (this.dataTells === false && this.lastAttemptMono === null) {
+      push(
+        '/data does not tell when DriveBC was last read: the first read waits 3 min after the start.',
+        '/data ne dit pas quand DriveBC a été lu : la première lecture attend 3 min après le démarrage.',
+      );
+    }
+    if (this.saveFailed) {
+      push(
+        'The time of the last read could not be written in /data: a restart may read sooner than the interval.',
+        "L'heure de la dernière lecture n'a pas pu être écrite dans /data : un redémarrage peut lire plus tôt que l'intervalle.",
+      );
     }
     if (this.storeStatus === 'unreadable') {
       push(

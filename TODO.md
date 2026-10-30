@@ -13,7 +13,8 @@
 ## To confirm over time on the live API
 
 - [ ] The pagination (`pagination.next_url`) of a page holding 500 events: never seen (364 active events in the
-      whole province on 2026-10-29); the code follows `next_url` only after a full page.
+      whole province on 2026-10-29); the code follows `next_url` only after a full page, and a 1008 answer on a
+      next page ends the list.
 - [ ] Other `+delay` formats than "N minutes" (read as unknown otherwise, never 0).
 - [ ] Whether DriveBC ever sends `recurring_schedules` (read as "in effect" when present).
 - [ ] The throttling of DriveBC: a 429 came after about 10 requests in 3 s from the VM; its page asks for 10 s
@@ -46,5 +47,20 @@
 - **The summary language is a configuration choice** (English by default): the integration cannot know the
   language of the Gladys user.
 - **Test button = last read**: it never reads (the interval holds for it too).
+- **"No event" = HTTP 500 with `error_code` 1008** (review r1, seen live by the reviewer on a sea box and a land
+  box): read as an empty list only for that exact body (`error` starting "Error processing OP5 event data" and
+  `error_code` the number 1008, nothing else); any other 500 stays an outage. A fall from N ≥ 1 to 0 through that
+  answer is published only at the next scheduled read that says the same (no extra request); the previous count is
+  the one published in this process, else the one Gladys holds.
+- **/data that cannot tell the last attempt** (unreadable, date in the future, not writable or frozen when written back at
+  start): the first read waits 3 minutes (the minimum interval) after the process start; within a process the
+  monotonic time of the last round decides.
+- **Pauses**: 429 (5 min doubled), 5xx (2 min doubled), other unexpected statuses (2 min doubled, own level), all
+  bounded to 6 h; a refusal arriving after a config save or a reconnection still pauses, and holds any request of
+  the new round; a round woken before the end of a pause is armed again, never skipped.
+- **A server Date more than 24 h off** the local clock is taken as missing (every active event counts, no scene).
+- **Equivalent mutants** (no test can kill them, guards kept): the final 600-character cut of the summary (the loop
+  already bounds every addition), the reset of the monotonic pause on a success (a read only succeeds once the
+  pause has ended) and the explicit end of the list on a 1008 past the first page (an empty page ends it as well).
 - **Counts of a failed read are never published** (nothing rather than 0); the status says since when.
 - **`connected`** shown when the last read of at least one zone succeeded less than 2 hours ago.

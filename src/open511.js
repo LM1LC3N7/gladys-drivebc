@@ -9,8 +9,9 @@
 // the live API (2026-10-29): `created` / `updated` carry an offset
 // (`2026-09-24T11:02:28-07:00`); the schedule intervals carry none and are
 // UTC (`2026-09-24T18:02/` for an event created at 11:02 PDT); a road's
-// `+delay` is a text (`"20 minutes"`) or empty; filters the API does not
-// understand, and an offset past the last event, answer 500.
+// `+delay` is a text (`"20 minutes"`) or empty; a box without any event, and
+// an offset past the last event, answer 500 with `error_code` 1008 (read here
+// as an empty list); other filters the API does not understand answer 500 too.
 // -----------------------------------------------------------------------------
 
 import {
@@ -77,6 +78,11 @@ export async function getJson(url, { fetchImpl = fetch, timers = globalThis } = 
         serverDate,
       };
     }
+    // DriveBC answers a box without any event with this exact 500 (checked
+    // live on 2026-10-29: a sea box and a land box); any other 500 is an outage.
+    if (response.status === 500 && (await isEmptyAnswer(response))) {
+      return { ok: true, json: { events: [] }, empty: true, serverDate };
+    }
     if (response.status >= 500) {
       return {
         ok: false,
@@ -113,8 +119,32 @@ export async function getJson(url, { fetchImpl = fetch, timers = globalThis } = 
   }
 }
 
-/** The body as text, or `null` past MAX_BODY_BYTES (the rest never read). */
-async function readBounded(response) {
+/** The signature of "no event in this box": `{"error": "Error processing OP5 event data...", "error_code": 1008}`. */
+export const EMPTY_ERROR_CODE = 1008;
+const EMPTY_BODY_MAX = 4096;
+
+async function isEmptyAnswer(response) {
+  const text = await readBounded(response, EMPTY_BODY_MAX).catch(() => null);
+  if (text === null) return false;
+  let json;
+  try {
+    json = JSON.parse(text);
+  } catch {
+    return false;
+  }
+  return (
+    !!json &&
+    typeof json === 'object' &&
+    !Array.isArray(json) &&
+    json.error_code === EMPTY_ERROR_CODE &&
+    typeof json.error === 'string' &&
+    json.error.startsWith('Error processing OP5 event data') &&
+    Object.keys(json).length === 2
+  );
+}
+
+/** The body as text, or `null` past `max` bytes (the rest never read). */
+async function readBounded(response, max = MAX_BODY_BYTES) {
   if (!response.body) return '';
   const reader = response.body.getReader();
   const chunks = [];
@@ -123,7 +153,7 @@ async function readBounded(response) {
     const { done, value } = await reader.read();
     if (done) break;
     size += value.byteLength;
-    if (size > MAX_BODY_BYTES) {
+    if (size > max) {
       await reader.cancel().catch(() => {});
       return null;
     }
@@ -290,7 +320,8 @@ export function readEvent(raw) {
 
 /**
  * One page: `{ events, skipped, raw, hasMore }` or `null` when the envelope
- * is not an Open511 list of events (an error object, an HTML page...).
+ * is not an Open511 list of events (an error object, an HTML page...) or
+ * when more than half of its events cannot be read.
  */
 export function readEventsPage(json) {
   if (!json || typeof json !== 'object' || Array.isArray(json)) return null;
@@ -302,9 +333,12 @@ export function readEventsPage(json) {
     if (event) events.push(event);
     else skipped += 1;
   }
+  // A list made mostly of events that cannot be read is not "no event": the
+  // format changed, or the answer is broken. Never published as 0.
+  if (json.events.length > 0 && skipped * 2 > json.events.length) return null;
   const next =
     json.pagination && typeof json.pagination === 'object' ? json.pagination.next_url : undefined;
-  // DriveBC answers 500 past the last event: only a full page is followed.
+  // Only a full page announcing a next one is followed.
   const hasMore = json.events.length >= PAGE_LIMIT && typeof next === 'string' && next !== '';
   return { events, skipped, raw: json.events.length, hasMore };
 }

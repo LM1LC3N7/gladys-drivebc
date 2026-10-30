@@ -46,7 +46,7 @@ test('real clock x20: one round per interval, requests 12 s apart, bounded timer
     store: createMemoryStore(),
     apiBase: `http://127.0.0.1:${server.address().port}`,
   });
-  const spy = spyOn(app, 'runCycle', clock);
+  const spy = spyOn(app, 'round', clock);
   try {
     await app.start(config);
     const gaps = await measurePeriod(spy, { count: 3, period: REFRESH * MINUTE });

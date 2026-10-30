@@ -28,7 +28,15 @@ DriveBC texts stay in English, the only language of the API.
 **In effect** means: an active event whose schedule interval covers the current time, as given by the DriveBC
 server (`Date` header). An event planned for later is not counted until its interval starts. Daily hours written only
 in the description ("7:00 AM to 7:00 PM, weekdays") are not read: such an event counts for its whole interval. An
-event without a readable schedule, or an answer without a readable server time, counts as in effect.
+event without a readable schedule, or an answer without a readable server time, counts as in effect. A server time
+more than a day away from the clock of Gladys is not believed (taken as unreadable).
+
+**No event**: DriveBC answers a box without any event with an HTTP 500 carrying the code 1008 ("Error processing
+OP5 event data"), never with an empty list (checked on the live API). The integration reads that exact answer as
+"no event"; any other 500 is an outage. When a zone that had events falls to "no event" through that answer, 0 is
+published only if the next scheduled read says the same (no extra request): one interval later. A first read, or a
+zone already at 0, is published at once. A list where more than half of the events cannot be read is an unreadable
+answer, never 0.
 
 ## Scene trigger: "New DriveBC event in a zone"
 
@@ -63,11 +71,16 @@ DriveBC throttles its API and asks to space requests by 10 seconds or more. The 
   round; a zone with more than 500 events takes one more request per 500, up to 2000);
 - starts a round every interval, measured from the start of the previous round;
 - does not read sooner after a restart, a reconnection to Gladys, a configuration saved unchanged, a Discovery or
-  the test button (the time of the last attempt is kept in `/data`); moving a zone reads at once, 12 seconds after
-  the last request;
+  the test button (the time of the last attempt is kept in `/data`, and in memory); moving a zone reads at once,
+  12 seconds after the last request;
+- when `/data` cannot tell the last attempt (unreadable file, a date in the future, a `/data` that cannot be written
+  or does not answer within 2 seconds), waits 3 minutes after the start before the first read, and says so in the
+  status; a `/data` that stops being writable later is said in the status too: a restart may then read sooner;
 - after a **429** ("too many requests"), pauses every read for 5 minutes, then 10, 20… up to 6 hours; after a
-  server error (**5xx**), for 2 minutes, then 4, 8… up to 6 hours; a `Retry-After` longer than that is honored, up
-  to 6 hours. The pause is kept in `/data` across restarts; the doubling starts over after a successful read;
+  server error (**5xx**, the "no event" answer apart) or another unexpected status (400, 403, 404…), for 2 minutes,
+  then 4, 8… up to 6 hours; a `Retry-After` longer than that is honored, up to 6 hours. A refusal that arrives while
+  the configuration is being saved, or Gladys reconnects, still starts the pause. The pause is kept in `/data`
+  across restarts; the doubling starts over after a successful read;
 - identifies itself with the User-Agent `gladys-drivebc/<version> (+https://github.com/LM1LC3N7/gladys-drivebc)`;
 - cuts an answer after 30 seconds or 16 MB.
 
@@ -77,7 +90,8 @@ DriveBC does not offer `ETag` nor `Last-Modified` on its events: every round rea
 
 The Configuration screen shows, for each zone, the counts of the last read and its time (Pacific time), or why it
 failed and the time of the last data. Data older than 2 hours is said stale. When a read fails, nothing is
-published for that zone: the devices keep their last values and the status says since when. The integration is
+published for that zone: the devices keep their last values and the status says since when. A fall to 0 waiting
+for its confirmation is said too. The integration is
 shown connected when the last read of at least one zone succeeded, less than 2 hours ago.
 
 ## Privacy
@@ -91,5 +105,5 @@ and per zone the ids of the events already seen with a salted fingerprint of the
 - British Columbia only (the zone center must be in BC; events near the borders are included).
 - Tested against the real DriveBC API on 2026-10-29; not yet tested by a user in British Columbia.
 - The texts of DriveBC are in English only.
-- An empty answer from DriveBC reads as "no event": the integration cannot tell it from a DriveBC outage that
-  would return an empty list.
+- "No event" is the HTTP 500 with code 1008 of DriveBC: should DriveBC ever send that exact answer during an outage,
+  a zone would show 0 after two such reads in a row (one interval apart).

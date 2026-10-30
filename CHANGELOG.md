@@ -18,3 +18,7 @@ the notes of the version's GitHub Release.
 - A button that shows the last read of each zone and the next one.
 - Courtesy toward DriveBC: one request at a time, 12 s apart; pauses after a 429 or a 5xx, kept across restarts;
   no read sooner than the interval after a restart.
+- "No event" in a zone is the HTTP 500 with code 1008 of DriveBC: read as 0, a fall from events to 0 confirmed by
+  the next read.
+- Restarts never read at once when `/data` cannot tell the last read; unexpected statuses (403, 404…) are spaced
+  out like server errors; a server date more than a day off is not believed.

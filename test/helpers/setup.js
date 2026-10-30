@@ -23,6 +23,11 @@ export const HOUR = 60 * MINUTE;
 export const FIXTURE = JSON.parse(
   readFileSync(new URL('../fixtures/vancouver.json', import.meta.url), 'utf8'),
 );
+/** The real answer of DriveBC to a box without any event: HTTP 500, code 1008. */
+export const EMPTY_1008 = JSON.parse(
+  readFileSync(new URL('../fixtures/empty-1008.json', import.meta.url), 'utf8'),
+).body;
+
 /** The time of the capture (its `Date` header). */
 export const CAPTURED_AT = Date.parse(FIXTURE.date);
 
@@ -132,6 +137,7 @@ export function createdDevices(config) {
 
 export async function setup({
   config = HOME,
+  devices,
   store = createMemoryStore(),
   api = createApi(),
   created = true,
@@ -141,7 +147,7 @@ export async function setup({
   const gladys = createFakeGladys({
     selector: SELECTOR,
     config,
-    devices: created ? createdDevices(config) : [],
+    devices: devices ?? (created ? createdDevices(config) : []),
   });
   await gladys.connect();
   const clock = testClock({ start });
@@ -174,3 +180,6 @@ export const published = (fake, id) =>
   fake.states
     .filter((s) => s.device_feature_external_id === id)
     .map((s) => (s.text !== undefined ? s.text : s.state));
+
+/** The "no event" answer of DriveBC, dated by the virtual clock. */
+export const empty1008 = (api) => json(EMPTY_1008, { status: 500, date: api.clock.wall() });
