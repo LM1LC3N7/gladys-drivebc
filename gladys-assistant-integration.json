@@ -6,8 +6,8 @@
     "en": "Unofficial. Road events in British Columbia from DriveBC open data.",
     "fr": "Non officiel. Événements routiers en Colombie-Britannique (données ouvertes DriveBC)."
   },
-  "version": "0.1.0",
-  "docker_image": "ghcr.io/lm1lc3n7/gladys-drivebc:0.1.0",
+  "version": "0.1.1",
+  "docker_image": "ghcr.io/lm1lc3n7/gladys-drivebc:0.1.1",
   "gladys_version": ">=5.1.0",
   "cover_image": "https://raw.githubusercontent.com/LM1LC3N7/gladys-drivebc/main/cover.png",
   "categories": ["transport"],

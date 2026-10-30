@@ -10,6 +10,8 @@ the notes of the version's GitHub Release.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-10-30
+
 ### Added
 
 - Up to three watch zones in British Columbia, each one a Gladys device: events in effect, road closures, major
@@ -24,3 +26,6 @@ the notes of the version's GitHub Release.
   out like server errors; a server date more than a day off is not believed.
 - A zone whose events cannot be read is said so in the status (nothing published, no pause); a held fall to 0 is
   said stale after 2 hours.
+
+[Unreleased]: https://github.com/LM1LC3N7/gladys-drivebc/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/LM1LC3N7/gladys-drivebc/releases/tag/v0.1.1

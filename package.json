@@ -1,6 +1,6 @@
 {
   "name": "gladys-drivebc",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Unofficial DriveBC integration for Gladys Assistant: road events (closures, construction, incidents, road conditions) in British Columbia from the DriveBC Open511 open data.",
   "type": "module",
